@@ -17,7 +17,7 @@
     --gold: #e8a030;
     --danger: #c64532;
     --safe: #4b8f75;
-    --game-width: 540px;
+    --game-width: clamp(21rem, min(94vw, calc((100dvh - 8rem) * 1.05)), 56rem);
     --ui-tan: url("assets/kenney-pixel-ui/9-slice/tan.png");
     --ui-brown: url("assets/kenney-pixel-ui/9-slice/brown.png");
     --ui-brown-pressed: url("assets/kenney-pixel-ui/9-slice/brown_pressed.png");
@@ -34,11 +34,12 @@
 
   body {
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem;
+    padding: clamp(0.45rem, 1.2vmin, 1.25rem);
     background:
       linear-gradient(180deg, rgba(255,255,255,0.04), transparent 40%),
       var(--night);
@@ -828,6 +829,33 @@
     #msg {
       min-height: 1.8rem;
       font-size: 0.8rem;
+    }
+  }
+
+  @media (min-width: 900px) and (min-height: 760px) {
+    :root {
+      --game-width: clamp(34rem, min(88vw, calc((100dvh - 7.5rem) * 1.06)), 60rem);
+    }
+
+    #ui {
+      font-size: clamp(0.82rem, 0.78vw, 1rem);
+    }
+
+    #msg {
+      font-size: clamp(0.8rem, 0.72vw, 0.95rem);
+    }
+
+    .hud-icon,
+    .msg-icon,
+    .menu-pixel-icon {
+      width: 1.12em;
+      height: 1.12em;
+    }
+  }
+
+  @media (max-height: 680px) {
+    body {
+      align-items: flex-start;
     }
   }
 
