@@ -653,7 +653,7 @@
   }
 
   .intro-card {
-    width: min(100%, 35rem);
+    width: min(100%, 40rem);
     position: relative;
     overflow: hidden;
     padding: 0.8rem;
@@ -663,12 +663,20 @@
     image-rendering: pixelated;
   }
 
+  .intro-card::before {
+    content: "";
+    position: absolute;
+    inset: 0.3rem;
+    border: 1px solid rgba(245,237,216,0.16);
+    pointer-events: none;
+  }
+
   .intro-file {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.45rem;
     color: #ffe066;
     font-size: clamp(0.72rem, 2.6vw, 0.95rem);
     font-weight: 700;
@@ -679,10 +687,19 @@
     color: #e9e0ce;
   }
 
-  .intro-scene {
-    height: clamp(11rem, 42vw, 15rem);
+  .intro-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .intro-beat {
+    min-height: clamp(7.8rem, 23vw, 10.6rem);
     position: relative;
     overflow: hidden;
+    padding: 0.42rem;
+    opacity: 0.36;
+    filter: saturate(0.62) brightness(0.82);
     background:
       linear-gradient(90deg, transparent 0 42%, #c8b878 42% 58%, transparent 58%),
       linear-gradient(0deg, transparent 0 47%, #d4b483 47% 58%, transparent 58%),
@@ -690,40 +707,92 @@
       #5a8a3c;
     border: 8px solid transparent;
     border-image: var(--ui-tan) 16 fill / 8px / 0 stretch;
+    animation: intro-panel 6.2s steps(1, end) forwards;
+    animation-delay: var(--beat-delay);
   }
 
-  .intro-scene::before {
+  .intro-beat::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(245,237,216,0.28), transparent);
+    background:
+      linear-gradient(90deg, transparent, rgba(245,237,216,0.28), transparent),
+      repeating-linear-gradient(0deg, rgba(23,17,29,0.04) 0 2px, transparent 2px 4px);
     transform: translateX(-110%);
-    animation: intro-scan 4.8s steps(18, end) forwards;
+    animation: intro-scan 6.2s steps(22, end) forwards;
+    animation-delay: var(--scan-delay);
   }
 
-  .intro-station,
+  .intro-beat::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.42rem;
+    top: 0.36rem;
+    z-index: 2;
+    padding: 0.12rem 0.22rem;
+    background: rgba(23,17,29,0.72);
+    color: #ffe066;
+    font-size: clamp(0.48rem, 1.5vw, 0.62rem);
+    font-weight: 700;
+  }
+
+  .intro-scene-stage,
+  .intro-caption-card,
+  .intro-stamp,
+  .intro-title-card {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .intro-scene-stage {
+    inset: 0;
+    transform-origin: center;
+  }
+
+  .intro-beat:nth-child(2) .intro-scene-stage,
+  .intro-beat:nth-child(3) .intro-scene-stage {
+    animation: intro-pan 6.2s steps(9, end) forwards;
+    animation-delay: var(--pan-delay);
+  }
+
+  .intro-caption-card {
+    left: 0.45rem;
+    right: 0.45rem;
+    bottom: 0.42rem;
+    min-height: 1.95rem;
+    padding: 0.28rem 0.36rem;
+    background: rgba(23,17,29,0.78);
+    color: #f5edd8;
+    font-size: clamp(0.5rem, 1.7vw, 0.64rem);
+    line-height: 1.22;
+    text-align: left;
+  }
+
+  .intro-building,
   .intro-kiosk,
   .intro-fountain,
   .intro-car,
-  .intro-hippie,
-  .intro-cop,
+  .intro-person,
   .intro-crowd,
-  .intro-stamp {
+  .intro-paper,
+  .intro-record,
+  .intro-leaf,
+  .intro-lamp {
     position: absolute;
     display: block;
   }
 
-  .intro-station {
+  .intro-building {
     right: 9%;
     top: 10%;
-    width: 4.1rem;
-    height: 3rem;
+    width: 4.8rem;
+    height: 3.5rem;
     background: #6c665f;
     border-top: 0.45rem solid #463f3d;
     box-shadow: inset 0 -0.42rem 0 #4e4744;
   }
 
-  .intro-station::before {
+  .intro-building::before {
     content: "";
     position: absolute;
     left: 0.5rem;
@@ -758,8 +827,8 @@
   .intro-fountain {
     left: 50%;
     top: 43%;
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 3.2rem;
+    height: 3.2rem;
     transform: translate(-50%, -50%);
     background: #4a7ab8;
     border: 0.35rem solid #837c72;
@@ -778,10 +847,10 @@
   }
 
   .intro-car {
-    right: 12%;
-    bottom: 18%;
-    width: 2.9rem;
-    height: 1.35rem;
+    right: 9%;
+    bottom: 24%;
+    width: 3.7rem;
+    height: 1.75rem;
     background: #1a3a6e;
     box-shadow: inset 0.5rem -0.35rem 0 #4a7ab8;
     animation: intro-siren 0.65s steps(2, end) infinite;
@@ -800,41 +869,42 @@
   .intro-car::before { left: 0.35rem; }
   .intro-car::after { right: 0.35rem; }
 
-  .intro-hippie,
-  .intro-cop,
+  .intro-person,
   .intro-crowd span {
-    width: 0.55rem;
-    height: 0.55rem;
+    width: 0.85rem;
+    height: 0.85rem;
     background: #f5c880;
     box-shadow:
-      0 0.55rem 0 #6b3fa0,
-      -0.18rem 1.1rem 0 #17111d,
-      0.18rem 1.1rem 0 #17111d,
-      0 -0.18rem 0 #7a3a1a;
+      0 0.85rem 0 #6b3fa0,
+      -0.28rem 1.65rem 0 #17111d,
+      0.28rem 1.65rem 0 #17111d,
+      0 -0.28rem 0 #7a3a1a;
   }
 
-  .intro-hippie {
+  .intro-person.hippie {
     left: 9%;
-    bottom: 19%;
-    animation: intro-walk 4.8s steps(16, end) forwards;
+    bottom: 26%;
+    animation: intro-walk 6.2s steps(14, end) forwards;
   }
 
-  .intro-cop {
+  .intro-person.cop {
     right: 16%;
     top: 39%;
     box-shadow:
-      0 0.55rem 0 #1a3a6e,
-      -0.18rem 1.1rem 0 #17111d,
-      0.18rem 1.1rem 0 #17111d,
-      0 -0.18rem 0 #4a7ab8;
-    animation: intro-cop-look 4.8s steps(8, end) forwards;
+      0 0.85rem 0 #1a3a6e,
+      -0.28rem 1.65rem 0 #17111d,
+      0.28rem 1.65rem 0 #17111d,
+      0 -0.28rem 0 #4a7ab8;
+    animation: intro-cop-look 6.2s steps(8, end) forwards;
   }
 
   .intro-crowd {
-    left: 42%;
-    bottom: 20%;
+    left: 36%;
+    bottom: 31%;
+    width: 6rem;
+    height: 4rem;
     opacity: 0;
-    animation: intro-crowd 4.8s steps(3, end) forwards;
+    animation: intro-crowd 6.2s steps(3, end) forwards;
   }
 
   .intro-crowd span {
@@ -842,24 +912,112 @@
     background: #f5c880;
   }
 
-  .intro-crowd span:nth-child(1) { left: -1.1rem; bottom: 0; }
-  .intro-crowd span:nth-child(2) { left: 0.2rem; bottom: 0.25rem; box-shadow: 0 0.55rem 0 #c8501a, -0.18rem 1.1rem 0 #17111d, 0.18rem 1.1rem 0 #17111d, 0 -0.18rem 0 #7a3a1a; }
-  .intro-crowd span:nth-child(3) { left: 1.45rem; bottom: -0.05rem; box-shadow: 0 0.55rem 0 #4b8f75, -0.18rem 1.1rem 0 #17111d, 0.18rem 1.1rem 0 #17111d, 0 -0.18rem 0 #38202c; }
+  .intro-crowd span:nth-child(1) { left: 0; bottom: 0; }
+  .intro-crowd span:nth-child(2) { left: 1.25rem; bottom: 0.35rem; box-shadow: 0 0.85rem 0 #c8501a, -0.28rem 1.65rem 0 #17111d, 0.28rem 1.65rem 0 #17111d, 0 -0.28rem 0 #7a3a1a; }
+  .intro-crowd span:nth-child(3) { left: 2.55rem; bottom: 0; box-shadow: 0 0.85rem 0 #4b8f75, -0.28rem 1.65rem 0 #17111d, 0.28rem 1.65rem 0 #17111d, 0 -0.28rem 0 #38202c; }
+  .intro-crowd span:nth-child(4) { left: 3.8rem; bottom: 0.45rem; box-shadow: 0 0.85rem 0 #d94f8a, -0.28rem 1.65rem 0 #17111d, 0.28rem 1.65rem 0 #17111d, 0 -0.28rem 0 #7a3a1a; }
+
+  .intro-paper {
+    left: 18%;
+    top: 26%;
+    width: 2.4rem;
+    height: 3.1rem;
+    background: #f5edd8;
+    box-shadow: 0.35rem 0.35rem 0 rgba(23,17,29,0.22);
+  }
+
+  .intro-paper::before {
+    content: "";
+    position: absolute;
+    left: 0.42rem;
+    top: 0.6rem;
+    width: 1.4rem;
+    height: 0.2rem;
+    background: #17111d;
+    box-shadow: 0 0.55rem 0 #17111d, 0 1.1rem 0 #c64532;
+  }
+
+  .intro-record {
+    left: 54%;
+    top: 30%;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 50%;
+    background: #17111d;
+    box-shadow: inset 0 0 0 0.42rem #2b2638;
+  }
+
+  .intro-record::before {
+    content: "";
+    position: absolute;
+    left: 0.86rem;
+    top: 0.86rem;
+    width: 0.58rem;
+    height: 0.58rem;
+    background: #ffd700;
+  }
+
+  .intro-leaf {
+    right: 18%;
+    top: 30%;
+    width: 1rem;
+    height: 2.7rem;
+    background: #0f8d2e;
+    border: 0.18rem solid #17111d;
+    transform: rotate(-22deg);
+    box-shadow:
+      -0.95rem 0.45rem 0 -0.1rem #7ee33a,
+      0.95rem 0.45rem 0 -0.1rem #7ee33a,
+      -1.25rem 1.35rem 0 -0.16rem #0f8d2e,
+      1.25rem 1.35rem 0 -0.16rem #0f8d2e;
+  }
+
+  .intro-lamp {
+    left: 10%;
+    bottom: 24%;
+    width: 0.35rem;
+    height: 3.2rem;
+    background: #2b2638;
+  }
+
+  .intro-lamp::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: -0.55rem;
+    width: 1.3rem;
+    height: 0.75rem;
+    background: #ffe89a;
+    box-shadow: 0 0 1.5rem rgba(255,232,154,0.55);
+  }
 
   .intro-stamp {
-    right: 7%;
-    bottom: 8%;
-    padding: 0.35rem 0.5rem;
-    border: 0.2rem solid #c64532;
+    left: 50%;
+    top: 46%;
+    z-index: 3;
+    padding: 0.38rem 0.55rem;
+    border: 0.22rem solid #c64532;
+    background: rgba(245,237,216,0.85);
     color: #c64532;
     font-weight: 700;
-    transform: rotate(-8deg) scale(0.2);
+    transform: translate(-50%, -50%) rotate(-8deg) scale(0.2);
     opacity: 0;
-    animation: intro-stamp 4.8s steps(5, end) forwards;
+    animation: intro-stamp 6.2s steps(5, end) forwards;
+  }
+
+  .intro-title-card {
+    left: 50%;
+    top: 38%;
+    transform: translate(-50%, -50%);
+    color: #ffe066;
+    font-size: clamp(1.2rem, 4vw, 1.65rem);
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0.12rem 0.12rem 0 rgba(23,17,29,0.75);
   }
 
   .intro-title {
-    margin-top: 0.6rem;
+    margin-top: 0.45rem;
     color: #ffe066;
     font-size: clamp(1rem, 4.5vw, 1.55rem);
     font-weight: 700;
@@ -886,6 +1044,45 @@
     font-size: 0.76rem;
   }
 
+  .intro-scene-file {
+    background:
+      linear-gradient(90deg, transparent 0 47%, rgba(198,69,50,0.25) 47% 49%, transparent 49%),
+      repeating-linear-gradient(0deg, rgba(23,17,29,0.07) 0 0.28rem, transparent 0.28rem 0.68rem),
+      #d2bf8a;
+  }
+
+  .intro-scene-florida {
+    background:
+      linear-gradient(90deg, #7a5230 0 20%, transparent 20% 38%, #6a2845 38% 56%, transparent 56% 70%, #394b7a 70%),
+      linear-gradient(0deg, #c8b878 0 33%, #5a8a3c 33%);
+  }
+
+  .intro-scene-walk {
+    background:
+      linear-gradient(90deg, transparent 0 42%, #c8b878 42% 58%, transparent 58%),
+      linear-gradient(0deg, transparent 0 47%, #d4b483 47% 58%, transparent 58%),
+      #5a8a3c;
+  }
+
+  .intro-scene-patrol {
+    background:
+      linear-gradient(0deg, #303040 0 32%, #c8b878 32% 48%, #536f3c 48%),
+      #536f3c;
+  }
+
+  .intro-scene-crowd {
+    background:
+      radial-gradient(circle at 48% 46%, rgba(255,232,154,0.24), transparent 32%),
+      linear-gradient(90deg, transparent 0 42%, #c8b878 42% 58%, transparent 58%),
+      #5a8a3c;
+  }
+
+  .intro-scene-stamp {
+    background:
+      repeating-linear-gradient(0deg, rgba(23,17,29,0.08) 0 0.4rem, transparent 0.4rem 0.8rem),
+      #d2bf8a;
+  }
+
   @keyframes intro-scan {
     0% { transform: translateX(-110%); }
     76% { transform: translateX(110%); }
@@ -894,8 +1091,8 @@
 
   @keyframes intro-walk {
     0% { transform: translateX(0); }
-    55% { transform: translateX(12rem); }
-    100% { transform: translateX(14rem); }
+    55% { transform: translateX(7.8rem); }
+    100% { transform: translateX(9.4rem); }
   }
 
   @keyframes intro-cop-look {
@@ -904,8 +1101,8 @@
   }
 
   @keyframes intro-crowd {
-    0%, 46% { opacity: 0; }
-    58%, 100% { opacity: 1; }
+    0%, 34% { opacity: 0; transform: translateY(0.8rem); }
+    50%, 100% { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes intro-siren {
@@ -914,15 +1111,28 @@
   }
 
   @keyframes intro-stamp {
-    0%, 70% { opacity: 0; transform: rotate(-8deg) scale(0.2); }
-    84%, 100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+    0%, 70% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(0.2); }
+    82% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1.15); }
+    88% { opacity: 1; transform: translate(calc(-50% + 0.12rem), -50%) rotate(-8deg) scale(1); }
+    94%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
+  }
+
+  @keyframes intro-panel {
+    0%, 8% { opacity: 1; filter: saturate(0.92) brightness(0.92); transform: scale(0.985); }
+    12%, 100% { opacity: 1; filter: saturate(1.04) brightness(1); transform: scale(1); }
+  }
+
+  @keyframes intro-pan {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.08) translate(-2%, -1%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .intro-scene::before,
+    .intro-beat,
+    .intro-beat::before,
+    .intro-scene-stage,
     .intro-car,
-    .intro-hippie,
-    .intro-cop,
+    .intro-person,
     .intro-crowd,
     .intro-stamp {
       animation: none;
@@ -1329,8 +1539,23 @@
       padding: 0.55rem;
     }
 
-    .intro-scene {
-      height: 10.4rem;
+    .intro-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.28rem;
+    }
+
+    .intro-beat {
+      min-height: 5.9rem;
+      padding: 0.25rem;
+    }
+
+    .intro-caption-card {
+      left: 0.28rem;
+      right: 0.28rem;
+      bottom: 0.28rem;
+      min-height: 1.55rem;
+      padding: 0.18rem 0.24rem;
+      font-size: 0.48rem;
     }
 
     .intro-skip {
@@ -1385,20 +1610,21 @@
     }
 
     .mode-card {
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: 1fr;
       grid-template-rows: auto;
       gap: 0.18rem;
+      text-align: center;
+      justify-items: center;
     }
 
     .mode-card .menu-pixel-icon {
-      grid-row: auto;
-      width: 0.86rem;
-      height: 0.86rem;
+      display: none;
     }
 
     .mode-card strong {
-      font-size: 0.62rem;
-      line-height: 1;
+      font-size: 0.58rem;
+      line-height: 1.05;
+      overflow-wrap: normal;
     }
 
     .menu-archive {
@@ -1492,8 +1718,8 @@
 
   const VIEW_W = 540;
   const VIEW_H = 380;
-  const WORLD_W = 1200;
-  const WORLD_H = 820;
+  const WORLD_W = 1600;
+  const WORLD_H = 1100;
   const W = VIEW_W;
   const H = VIEW_H;
   const TILE = 20;
@@ -1504,6 +1730,7 @@
   const CONVOCATORIA_SCORE_KEY = "razzia_convocatoria_scores";
   const ARCHIVE_KEY = "razzia_archive";
   const INTRO_SESSION_KEY = "razzia_intro_seen";
+  const INTRO_DURATION = 6200;
   ctx.imageSmoothingEnabled = false;
 
   const ART_PATHS = {
@@ -1767,24 +1994,31 @@
   const NPC_ROUTES = {
     bohemian: [
       [{ x: 6, y: 14 }, { x: 13, y: 12 }, { x: 19, y: 15 }, { x: 11, y: 18 }],
-      [{ x: 26, y: 18 }, { x: 34, y: 18 }, { x: 38, y: 23 }, { x: 28, y: 24 }]
+      [{ x: 26, y: 18 }, { x: 34, y: 18 }, { x: 38, y: 23 }, { x: 28, y: 24 }],
+      [{ x: 58, y: 15 }, { x: 64, y: 15 }, { x: 70, y: 23 }, { x: 62, y: 29 }]
     ],
     journalist: [
       [{ x: 7, y: 8 }, { x: 13, y: 9 }, { x: 22, y: 8 }, { x: 30, y: 10 }],
-      [{ x: 31, y: 9 }, { x: 31, y: 18 }, { x: 24, y: 23 }, { x: 14, y: 24 }]
+      [{ x: 31, y: 9 }, { x: 31, y: 18 }, { x: 24, y: 23 }, { x: 14, y: 24 }],
+      [{ x: 63, y: 14 }, { x: 70, y: 18 }, { x: 72, y: 28 }, { x: 63, y: 30 }]
     ],
     musician: [
       [{ x: 16, y: 25 }, { x: 20, y: 30 }, { x: 27, y: 31 }, { x: 22, y: 24 }],
       [{ x: 47, y: 22 }, { x: 51, y: 25 }, { x: 49, y: 30 }, { x: 43, y: 27 }],
-      [{ x: 26, y: 35 }, { x: 33, y: 36 }, { x: 37, y: 38 }, { x: 29, y: 39 }]
+      [{ x: 26, y: 35 }, { x: 33, y: 36 }, { x: 37, y: 38 }, { x: 29, y: 39 }],
+      [{ x: 12, y: 46 }, { x: 18, y: 48 }, { x: 25, y: 46 }, { x: 20, y: 44 }],
+      [{ x: 60, y: 44 }, { x: 66, y: 48 }, { x: 72, y: 45 }, { x: 64, y: 40 }]
     ],
     executive: [
       [{ x: 31, y: 9 }, { x: 39, y: 9 }, { x: 39, y: 23 }, { x: 31, y: 23 }],
-      [{ x: 4, y: 24 }, { x: 16, y: 24 }, { x: 27, y: 24 }, { x: 37, y: 24 }]
+      [{ x: 4, y: 24 }, { x: 16, y: 24 }, { x: 27, y: 24 }, { x: 37, y: 24 }],
+      [{ x: 58, y: 15 }, { x: 64, y: 15 }, { x: 71, y: 23 }, { x: 63, y: 29 }]
     ],
     razzia: [
       [{ x: 23, y: 2 }, { x: 22, y: 8 }, { x: 31, y: 9 }, { x: 37, y: 18 }],
-      [{ x: 23, y: 2 }, { x: 18, y: 8 }, { x: 13, y: 14 }, { x: 8, y: 24 }]
+      [{ x: 23, y: 2 }, { x: 18, y: 8 }, { x: 13, y: 14 }, { x: 8, y: 24 }],
+      [{ x: 74, y: 20 }, { x: 70, y: 28 }, { x: 64, y: 34 }, { x: 58, y: 44 }],
+      [{ x: 62, y: 51 }, { x: 48, y: 44 }, { x: 38, y: 36 }, { x: 30, y: 46 }]
     ]
   };
 
@@ -1866,7 +2100,9 @@
       [{ x: 38, y: 5 }, { x: 31, y: 17 }, { x: 18, y: 24 }, { x: 37, y: 27 }],
       [{ x: 6, y: 27 }, { x: 14, y: 16 }, { x: 26, y: 8 }, { x: 40, y: 19 }],
       [{ x: 17, y: 4 }, { x: 36, y: 8 }, { x: 35, y: 24 }, { x: 17, y: 27 }],
-      [{ x: 5, y: 14 }, { x: 21, y: 14 }, { x: 31, y: 22 }, { x: 10, y: 28 }]
+      [{ x: 5, y: 14 }, { x: 21, y: 14 }, { x: 31, y: 22 }, { x: 10, y: 28 }],
+      [{ x: 58, y: 15 }, { x: 70, y: 18 }, { x: 74, y: 30 }, { x: 60, y: 34 }],
+      [{ x: 62, y: 51 }, { x: 48, y: 45 }, { x: 38, y: 38 }, { x: 70, y: 45 }]
     ]
   };
 
@@ -1886,9 +2122,76 @@
     patrols: [
       [{ x: 4, y: 4 }, { x: 21, y: 4 }, { x: 21, y: 15 }, { x: 4, y: 15 }],
       [{ x: 37, y: 8 }, { x: 31, y: 16 }, { x: 23, y: 23 }, { x: 37, y: 24 }],
-      [{ x: 6, y: 27 }, { x: 13, y: 23 }, { x: 21, y: 23 }, { x: 31, y: 27 }]
+      [{ x: 6, y: 27 }, { x: 13, y: 23 }, { x: 21, y: 23 }, { x: 31, y: 27 }],
+      [{ x: 58, y: 15 }, { x: 64, y: 23 }, { x: 72, y: 30 }, { x: 63, y: 38 }]
     ]
   };
+
+  const PATH_RECTS = [
+    { x0: 0, x1: 79, y0: 8, y1: 10 },
+    { x0: 0, x1: 79, y0: 23, y1: 25 },
+    { x0: 0, x1: 79, y0: 34, y1: 36 },
+    { x0: 18, x1: 79, y0: 38, y1: 40 },
+    { x0: 12, x1: 14, y0: 0, y1: 54 },
+    { x0: 31, x1: 33, y0: 0, y1: 54 },
+    { x0: 38, x1: 40, y0: 8, y1: 54 },
+    { x0: 47, x1: 49, y0: 7, y1: 54 },
+    { x0: 63, x1: 65, y0: 8, y1: 50 },
+    { x0: 70, x1: 72, y0: 18, y1: 54 },
+    { x0: 1, x1: 5, y0: 8, y1: 10 },
+    { x0: 21, x1: 31, y0: 0, y1: 5 },
+    { x0: 42, x1: 50, y0: 10, y1: 12 },
+    { x0: 45, x1: 55, y0: 23, y1: 25 },
+    { x0: 20, x1: 32, y0: 36, y1: 38 },
+    { x0: 58, x1: 72, y0: 14, y1: 16 },
+    { x0: 58, x1: 76, y0: 28, y1: 30 },
+    { x0: 54, x1: 76, y0: 43, y1: 45 },
+    { x0: 8, x1: 28, y0: 45, y1: 48 },
+    { x0: 56, x1: 66, y0: 51, y1: 53 }
+  ];
+
+  const PATH_DIAGS = [
+    { m: 0.46, b: 3, x0: 0, x1: 56, y0: 0, y1: 32 },
+    { m: -0.36, b: 26, x0: 0, x1: 60, y0: 0, y1: 30 },
+    { m: 0.28, b: 15, x0: 0, x1: 78, y0: 14, y1: 40 },
+    { m: -0.34, b: 48, x0: 34, x1: 78, y0: 18, y1: 40 },
+    { m: 0.22, b: 20, x0: 36, x1: 78, y0: 24, y1: 42 },
+    { m: -0.26, b: 64, x0: 40, x1: 78, y0: 36, y1: 54 },
+    { m: 0.18, b: 35, x0: 22, x1: 78, y0: 38, y1: 52 }
+  ];
+
+  const INTRO_STORY = [
+    {
+      label: "EXPEDIENTE 1966",
+      caption: "Una ficha se abre: pelo largo, plaza, sospecha.",
+      scene: "file"
+    },
+    {
+      label: "FLORIDA / DI TELLA",
+      caption: "La ciudad pop prende vidrieras, discos y revistas.",
+      scene: "florida"
+    },
+    {
+      label: "PLAZA SAN MARTIN",
+      caption: "Un hippie cruza la plaza buscando otros pelos largos.",
+      scene: "walk"
+    },
+    {
+      label: "RAZZIA",
+      caption: "El patrullero aparece: la mirada policial cierra el cuadro.",
+      scene: "patrol"
+    },
+    {
+      label: "CONVOCATORIA",
+      caption: "La persecucion, sin quererlo, junta a los dispersos.",
+      scene: "crowd"
+    },
+    {
+      label: "LA RAZZIA",
+      caption: "Corre, reuni, aguanta.",
+      scene: "stamp"
+    }
+  ];
 
   const MAP = {
     playerSpawn: { x: 7, y: 15 },
@@ -1905,7 +2208,13 @@
       { x: 47, y: 8 }, { x: 54, y: 6 }, { x: 57, y: 14 },
       { x: 45, y: 20 }, { x: 52, y: 24 }, { x: 58, y: 30 },
       { x: 42, y: 34 }, { x: 34, y: 37 }, { x: 19, y: 36 },
-      { x: 9, y: 34 }, { x: 26, y: 39 }, { x: 49, y: 39 }
+      { x: 9, y: 34 }, { x: 26, y: 39 }, { x: 49, y: 39 },
+      { x: 63, y: 6 }, { x: 70, y: 7 }, { x: 76, y: 12 },
+      { x: 61, y: 20 }, { x: 68, y: 24 }, { x: 77, y: 27 },
+      { x: 56, y: 33 }, { x: 66, y: 37 }, { x: 74, y: 40 },
+      { x: 55, y: 46 }, { x: 63, y: 49 }, { x: 73, y: 51 },
+      { x: 4, y: 45 }, { x: 15, y: 47 }, { x: 27, y: 49 },
+      { x: 36, y: 50 }, { x: 45, y: 52 }, { x: 58, y: 53 }
     ],
     benches: [
       { x: 5, y: 8, w: 2, h: 1 },
@@ -1920,7 +2229,12 @@
       { x: 51, y: 15, w: 2, h: 1 },
       { x: 44, y: 27, w: 2, h: 1 },
       { x: 22, y: 35, w: 2, h: 1 },
-      { x: 35, y: 38, w: 2, h: 1 }
+      { x: 35, y: 38, w: 2, h: 1 },
+      { x: 61, y: 15, w: 2, h: 1 },
+      { x: 68, y: 29, w: 2, h: 1 },
+      { x: 58, y: 44, w: 2, h: 1 },
+      { x: 13, y: 46, w: 2, h: 1 },
+      { x: 70, y: 47, w: 2, h: 1 }
     ],
     fountain: [
       { x: 12, y: 8 }, { x: 13, y: 8 }, { x: 14, y: 8 },
@@ -1949,13 +2263,22 @@
       { x: 1028, y: 684, text: "Costanera" },
       { x: 682, y: 136, text: "Galeria" },
       { x: 718, y: 510, text: "La Paz" },
-      { x: 1110, y: 606, text: "Gesell" }
+      { x: 1110, y: 606, text: "Gesell" },
+      { x: 1260, y: 292, text: "Galeria Este" },
+      { x: 1374, y: 172, text: "J. Alvarez" },
+      { x: 1210, y: 850, text: "La Perla" },
+      { x: 300, y: 930, text: "Plaza Francia" },
+      { x: 1460, y: 520, text: "Tucuman Arde" },
+      { x: 1322, y: 922, text: "Fogon Gesell" }
     ],
     lamps: [
       { x: 196, y: 145 }, { x: 330, y: 150 }, { x: 432, y: 312 },
       { x: 226, y: 458 }, { x: 596, y: 310 }, { x: 742, y: 258 },
       { x: 116, y: 424 }, { x: 884, y: 210 }, { x: 1018, y: 324 },
-      { x: 1066, y: 578 }, { x: 706, y: 650 }, { x: 430, y: 710 }
+      { x: 1066, y: 578 }, { x: 706, y: 650 }, { x: 430, y: 710 },
+      { x: 1260, y: 210 }, { x: 1430, y: 280 }, { x: 1198, y: 474 },
+      { x: 1488, y: 540 }, { x: 1180, y: 850 }, { x: 1328, y: 930 },
+      { x: 326, y: 914 }, { x: 760, y: 958 }
     ],
     posters: [
       { x: 456, y: 38, text: "NO", color: "danger" },
@@ -1969,7 +2292,13 @@
       { x: 1042, y: 718, text: "SOL", color: "gold" },
       { x: 738, y: 448, text: "BLOW", color: "posterBlue" },
       { x: 556, y: 82, text: "MOD", color: "gold" },
-      { x: 204, y: 654, text: "LIB", color: "posterPurple" }
+      { x: 204, y: 654, text: "LIB", color: "posterPurple" },
+      { x: 1286, y: 332, text: "G.E.", color: "posterPink" },
+      { x: 1380, y: 206, text: "JA", color: "gold" },
+      { x: 1214, y: 880, text: "ONCE", color: "posterPurple" },
+      { x: 1468, y: 554, text: "ARDE", color: "danger" },
+      { x: 314, y: 962, text: "FOLK", color: "leafLight" },
+      { x: 1338, y: 954, text: "MANAL", color: "posterBlue" }
     ],
     flyerPapers: [
       { x: 156, y: 246, tint: "paper" }, { x: 356, y: 214, tint: "gold" },
@@ -1978,7 +2307,11 @@
       { x: 120, y: 500, tint: "gold" }, { x: 418, y: 524, tint: "paper" },
       { x: 890, y: 228, tint: "paper" }, { x: 1042, y: 382, tint: "gold" },
       { x: 956, y: 516, tint: "paper" }, { x: 520, y: 706, tint: "paper" },
-      { x: 740, y: 682, tint: "gold" }, { x: 1100, y: 656, tint: "paper" }
+      { x: 740, y: 682, tint: "gold" }, { x: 1100, y: 656, tint: "paper" },
+      { x: 1240, y: 302, tint: "paper" }, { x: 1388, y: 188, tint: "gold" },
+      { x: 1186, y: 874, tint: "paper" }, { x: 1472, y: 532, tint: "paper" },
+      { x: 318, y: 940, tint: "gold" }, { x: 1328, y: 902, tint: "paper" },
+      { x: 728, y: 956, tint: "paper" }, { x: 1510, y: 720, tint: "gold" }
     ],
     flowerBeds: [
       { x: 72, y: 70, w: 40, h: 14 },
@@ -1988,7 +2321,13 @@
       { x: 762, y: 120, w: 54, h: 14 },
       { x: 870, y: 288, w: 70, h: 14 },
       { x: 1010, y: 602, w: 78, h: 14 },
-      { x: 566, y: 716, w: 66, h: 12 }
+      { x: 566, y: 716, w: 66, h: 12 },
+      { x: 1240, y: 250, w: 82, h: 14 },
+      { x: 1398, y: 380, w: 70, h: 14 },
+      { x: 1170, y: 820, w: 78, h: 14 },
+      { x: 280, y: 900, w: 86, h: 14 },
+      { x: 1320, y: 992, w: 88, h: 14 },
+      { x: 1480, y: 650, w: 68, h: 12 }
     ],
     props: [
       { x: 690, y: 122, kind: "boutique" },
@@ -1998,7 +2337,13 @@
       { x: 152, y: 704, kind: "guitar" },
       { x: 560, y: 92, kind: "scissors" },
       { x: 1130, y: 606, kind: "beach" },
-      { x: 236, y: 646, kind: "books" }
+      { x: 236, y: 646, kind: "books" },
+      { x: 1286, y: 324, kind: "boutique" },
+      { x: 1382, y: 196, kind: "books" },
+      { x: 1210, y: 872, kind: "coffee" },
+      { x: 310, y: 940, kind: "guitar" },
+      { x: 1340, y: 938, kind: "beach" },
+      { x: 1468, y: 540, kind: "camera" }
     ],
     easterEggs: [
       {
@@ -2175,8 +2520,123 @@
         text: "Los parques armaban una red de encuentros antes de volverse multitud.",
         bonus: 25,
         kind: "books"
+      },
+      {
+        id: "la-perla-once",
+        x: 1210,
+        y: 872,
+        label: "La Perla del Once",
+        section: "Rock",
+        text: "En la mesa de un bar tambien podia empezar una cancion generacional.",
+        bonus: 25,
+        kind: "coffee",
+        summon: 1
+      },
+      {
+        id: "tanguito",
+        x: 1188,
+        y: 910,
+        label: "Tanguito",
+        section: "Rock",
+        text: "El mito joven mezcla noches, caminatas, bares y canciones abiertas.",
+        bonus: 25,
+        kind: "record",
+        summon: 1
+      },
+      {
+        id: "los-beatniks",
+        x: 332,
+        y: 940,
+        label: "Los Beatniks",
+        section: "Beat",
+        text: "La playa, el escandalo y el single arman una postal beat argentina.",
+        bonus: 25,
+        kind: "guitar",
+        summon: 2
+      },
+      {
+        id: "tucuman-arde",
+        x: 1468,
+        y: 540,
+        label: "Tucumán Arde",
+        section: "Vanguardia",
+        text: "La vanguardia sale del museo y busca intervenir la calle politica.",
+        bonus: 25,
+        kind: "poster"
+      },
+      {
+        id: "editorial-jorge-alvarez",
+        x: 1382,
+        y: 196,
+        label: "Jorge Álvarez",
+        section: "Consumo",
+        text: "Libros y discos cruzan redes: editar tambien era abrir camino.",
+        bonus: 25,
+        kind: "books"
+      },
+      {
+        id: "galeria-del-este",
+        x: 1286,
+        y: 324,
+        label: "Galería del Este",
+        section: "Florida",
+        text: "La vidriera pop vuelve visible una ciudad joven, brillante e inquieta.",
+        bonus: 25,
+        kind: "boutique"
+      },
+      {
+        id: "manal",
+        x: 1340,
+        y: 938,
+        label: "Manal",
+        section: "Rock",
+        text: "El blues urbano encuentra su idioma entre avenidas, humo y madrugada.",
+        bonus: 25,
+        kind: "record"
+      },
+      {
+        id: "fogon-gesell",
+        x: 1328,
+        y: 902,
+        label: "Fogón de Gesell",
+        section: "Balnearios",
+        text: "El borde de la ciudad promete fogones, campings y una fuga posible.",
+        bonus: 25,
+        kind: "beach",
+        summon: 1
       }
-    ]
+    ],
+    spawnZones: {
+      storyEarly: [
+        { x0: 3, x1: 24, y0: 4, y1: 19 },
+        { x0: 24, x1: 42, y0: 9, y1: 27 },
+        { x0: 5, x1: 28, y0: 22, y1: 40 }
+      ],
+      storyMid: [
+        { x0: 3, x1: 28, y0: 4, y1: 26 },
+        { x0: 24, x1: 52, y0: 8, y1: 34 },
+        { x0: 18, x1: 48, y0: 28, y1: 42 },
+        { x0: 50, x1: 66, y0: 8, y1: 30 }
+      ],
+      storyLate: [
+        { x0: 3, x1: 32, y0: 4, y1: 40 },
+        { x0: 24, x1: 60, y0: 8, y1: 45 },
+        { x0: 46, x1: 72, y0: 12, y1: 48 }
+      ],
+      wide: [
+        { x0: 3, x1: 32, y0: 4, y1: 42 },
+        { x0: 24, x1: 60, y0: 8, y1: 48 },
+        { x0: 50, x1: 77, y0: 8, y1: 52 },
+        { x0: 6, x1: 30, y0: 42, y1: 52 }
+      ],
+      plaza: [
+        { x0: 4, x1: 20, y0: 6, y1: 18 },
+        { x0: 24, x1: 40, y0: 12, y1: 26 },
+        { x0: 6, x1: 19, y0: 22, y1: 29 },
+        { x0: 8, x1: 28, y0: 44, y1: 52 },
+        { x0: 58, x1: 74, y0: 36, y1: 52 }
+      ]
+    }
   };
 
   const SPRITES = {
@@ -3632,9 +4092,11 @@
   }
 
   function randomOpenTile(options = {}) {
-    for (let attempt = 0; attempt < 120; attempt++) {
-      const tx = 1 + Math.floor(Math.random() * (COLS - 2));
-      const ty = 1 + Math.floor(Math.random() * (ROWS - 2));
+    const zones = options.zones || spawnZonesForMode(options);
+    for (let attempt = 0; attempt < 160; attempt++) {
+      const zone = randomFrom(zones);
+      const tx = zone.x0 + Math.floor(Math.random() * (zone.x1 - zone.x0 + 1));
+      const ty = zone.y0 + Math.floor(Math.random() * (zone.y1 - zone.y0 + 1));
       if (!isSpawnable(tx, ty, options)) continue;
       return { x: tx, y: ty };
     }
@@ -3642,11 +4104,7 @@
   }
 
   function randomPlazaTile(options = {}) {
-    const zones = [
-      { x0: 4, x1: 20, y0: 6, y1: 18 },
-      { x0: 24, x1: 40, y0: 12, y1: 26 },
-      { x0: 6, x1: 19, y0: 22, y1: 29 }
-    ];
+    const zones = MAP.spawnZones.plaza;
     for (let attempt = 0; attempt < 100; attempt++) {
       const zone = randomFrom(zones);
       const tx = zone.x0 + Math.floor(Math.random() * (zone.x1 - zone.x0 + 1));
@@ -3655,6 +4113,16 @@
       return { x: tx, y: ty };
     }
     return randomOpenTile(options);
+  }
+
+  function spawnZonesForMode(options = {}) {
+    if (options.fullWorld) return [{ x0: 1, x1: COLS - 2, y0: 1, y1: ROWS - 2 }];
+    if (game.runMode === "survival" || game.runMode === "convocatoria" || options.preferWide) {
+      return MAP.spawnZones.wide;
+    }
+    if (game.round >= 2) return MAP.spawnZones.storyLate;
+    if (game.round >= 1) return MAP.spawnZones.storyMid;
+    return MAP.spawnZones.storyEarly;
   }
 
   function isSpawnable(tx, ty, options) {
@@ -3774,11 +4242,12 @@
   }
 
   function drawMap() {
+    const bounds = visibleTileBounds(2);
     ctx.fillStyle = COLORS.grass;
-    ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+    ctx.fillRect(game.camera.x - TILE, game.camera.y - TILE, W + TILE * 2, H + TILE * 2);
 
-    for (let ty = 0; ty < ROWS; ty++) {
-      for (let tx = 0; tx < COLS; tx++) {
+    for (let ty = bounds.y0; ty <= bounds.y1; ty++) {
+      for (let tx = bounds.x0; tx <= bounds.x1; tx++) {
         drawGrassTile(tx, ty);
         if (isPathTile(tx, ty)) drawPathTile(tx, ty);
       }
@@ -3798,6 +4267,25 @@
     drawPosters();
     drawEasterEggs();
     drawStreetLamps();
+  }
+
+  function visibleTileBounds(pad = 1) {
+    return {
+      x0: clamp(Math.floor(game.camera.x / TILE) - pad, 0, COLS - 1),
+      y0: clamp(Math.floor(game.camera.y / TILE) - pad, 0, ROWS - 1),
+      x1: clamp(Math.ceil((game.camera.x + W) / TILE) + pad, 0, COLS - 1),
+      y1: clamp(Math.ceil((game.camera.y + H) / TILE) + pad, 0, ROWS - 1)
+    };
+  }
+
+  function isPointVisible(x, y, pad = 64) {
+    return x >= game.camera.x - pad && x <= game.camera.x + W + pad
+      && y >= game.camera.y - pad && y <= game.camera.y + H + pad;
+  }
+
+  function isRectVisible(x, y, w, h, pad = 64) {
+    return x + w >= game.camera.x - pad && x <= game.camera.x + W + pad
+      && y + h >= game.camera.y - pad && y <= game.camera.y + H + pad;
   }
 
   function drawGrassTile(tx, ty) {
@@ -3835,33 +4323,20 @@
   }
 
   function isPathTile(tx, ty) {
-    const horizontal = ty >= 8 && ty <= 10;
-    const lowerHorizontal = ty >= 23 && ty <= 25;
-    const avenue = ty >= 34 && ty <= 36;
-    const lowerAvenue = ty >= 38 && ty <= 40 && tx >= 18;
-    const vertical = tx >= 12 && tx <= 14;
-    const eastVertical = tx >= 31 && tx <= 33;
-    const farEastVertical = tx >= 47 && tx <= 49 && ty >= 7;
-    const culturalVertical = tx >= 38 && tx <= 40 && ty >= 8;
-    const diagA = Math.abs(ty - (0.46 * tx + 3)) < 0.75;
-    const diagB = Math.abs(ty - (-0.36 * tx + 26)) < 0.75;
-    const diagC = Math.abs(ty - (0.28 * tx + 15)) < 0.75;
-    const diagD = Math.abs(ty - (-0.34 * tx + 48)) < 0.75 && tx >= 34;
-    const diagE = Math.abs(ty - (0.22 * tx + 20)) < 0.75 && tx >= 36;
-    const kioskFront = tx >= 1 && tx <= 5 && ty >= 8 && ty <= 10;
-    const stationFront = tx >= 21 && ty <= 5;
-    const diTellaFront = tx >= 42 && tx <= 50 && ty >= 10 && ty <= 12;
-    const cuevaFront = tx >= 45 && tx <= 55 && ty >= 23 && ty <= 25;
-    const mandiocaFront = tx >= 20 && tx <= 32 && ty >= 36 && ty <= 38;
-    return horizontal || lowerHorizontal || avenue || lowerAvenue || vertical || eastVertical
-      || farEastVertical || culturalVertical || diagA || diagB || diagC || diagD || diagE
-      || kioskFront || stationFront || diTellaFront || cuevaFront || mandiocaFront;
+    if (PATH_RECTS.some((rect) => tx >= rect.x0 && tx <= rect.x1 && ty >= rect.y0 && ty <= rect.y1)) {
+      return true;
+    }
+    return PATH_DIAGS.some((diag) => {
+      if (tx < diag.x0 || tx > diag.x1 || ty < diag.y0 || ty > diag.y1) return false;
+      return Math.abs(ty - (diag.m * tx + diag.b)) < 0.75;
+    });
   }
 
   function drawPathEdges() {
+    const bounds = visibleTileBounds(2);
     ctx.fillStyle = "rgba(70, 57, 44, 0.28)";
-    for (let ty = 0; ty < ROWS; ty++) {
-      for (let tx = 0; tx < COLS; tx++) {
+    for (let ty = bounds.y0; ty <= bounds.y1; ty++) {
+      for (let tx = bounds.x0; tx <= bounds.x1; tx++) {
         if (!isPathTile(tx, ty)) continue;
         const x = tx * TILE;
         const y = ty * TILE;
@@ -3881,6 +4356,7 @@
 
   function drawFlowerBeds() {
     for (const bed of MAP.flowerBeds) {
+      if (!isRectVisible(bed.x, bed.y, bed.w, bed.h, 32)) continue;
       ctx.fillStyle = "rgba(26,80,16,0.45)";
       ctx.fillRect(bed.x, bed.y, bed.w, bed.h);
       for (let x = bed.x + 4; x < bed.x + bed.w - 2; x += 8) {
@@ -3907,6 +4383,7 @@
 
   function drawLooseFlyers() {
     for (const paper of MAP.flyerPapers) {
+      if (!isPointVisible(paper.x, paper.y, 30)) continue;
       ctx.fillStyle = COLORS[paper.tint] || COLORS.paper;
       ctx.fillRect(paper.x, paper.y, 8, 5);
       ctx.fillStyle = "rgba(36,28,25,0.32)";
@@ -3960,67 +4437,63 @@
   }
 
   function drawDistrictExtras() {
-    drawPixelBuilding(650, 70, 90, 86, {
-      roof: "#8f4535",
-      wall: "#d4b483",
-      trim: "#7a5230",
-      door: "#4d3023",
-      awning: "#e8a030"
-    });
-    drawPixelBuilding(680, 420, 118, 84, {
-      roof: "#4e4744",
-      wall: "#9a9084",
-      trim: "#6c665f",
-      door: "#241c19",
-      awning: "#4a7ab8"
-    });
-    drawPixelNewsstand(602, 176);
-    drawPixelNewsstand(238, 500);
-    drawAwning(650, 102, 90, COLORS.posterPink);
-    drawAwning(680, 452, 118, COLORS.posterBlue);
-    drawVehicle("redCar", 0, 48, 48, 48, 598, 214, 38, 38);
-    drawVehicle("blueCar", 0, 48, 48, 48, 768, 360, 38, 38);
-    drawVehicle("redCar", 0, 96, 48, 48, 710, 206, 34, 34);
-    drawVehicle("blueCar", 0, 144, 48, 48, 78, 520, 34, 34);
-    drawPixelBuilding(870, 88, 128, 92, {
-      roof: "#394b7a",
-      wall: "#c8b878",
-      trim: "#6c665f",
-      door: "#2b2638",
-      awning: COLORS.posterBlue
-    });
-    drawPixelBuilding(950, 392, 138, 82, {
-      roof: "#2b2638",
-      wall: "#6a2845",
-      trim: "#3a2638",
-      door: "#17111d",
-      awning: COLORS.posterPurple
-    });
-    drawPixelBuilding(438, 690, 124, 78, {
-      roof: "#8f4535",
-      wall: "#d4b483",
-      trim: "#7a5230",
-      door: "#3a2638",
-      awning: COLORS.posterPink
-    });
-    drawPixelBuilding(1010, 634, 132, 72, {
-      roof: "#4e4744",
-      wall: "#b8aa77",
-      trim: "#6c665f",
-      door: "#241c19",
-      awning: COLORS.gold
-    });
-    drawPixelNewsstand(830, 266);
-    drawAwning(870, 120, 128, COLORS.posterBlue);
-    drawAwning(950, 424, 138, COLORS.posterPurple);
-    drawAwning(438, 722, 124, COLORS.posterPink);
-    drawVehicle("redCar", 0, 48, 48, 48, 928, 252, 36, 36);
-    drawVehicle("blueCar", 0, 96, 48, 48, 1070, 530, 36, 36);
-    drawVehicle("redCar", 0, 144, 48, 48, 622, 690, 34, 34);
+    const buildings = [
+      [650, 70, 90, 86, { roof: "#8f4535", wall: "#d4b483", trim: "#7a5230", door: "#4d3023", awning: "#e8a030" }],
+      [680, 420, 118, 84, { roof: "#4e4744", wall: "#9a9084", trim: "#6c665f", door: "#241c19", awning: "#4a7ab8" }],
+      [870, 88, 128, 92, { roof: "#394b7a", wall: "#c8b878", trim: "#6c665f", door: "#2b2638", awning: COLORS.posterBlue }],
+      [950, 392, 138, 82, { roof: "#2b2638", wall: "#6a2845", trim: "#3a2638", door: "#17111d", awning: COLORS.posterPurple }],
+      [438, 690, 124, 78, { roof: "#8f4535", wall: "#d4b483", trim: "#7a5230", door: "#3a2638", awning: COLORS.posterPink }],
+      [1010, 634, 132, 72, { roof: "#4e4744", wall: "#b8aa77", trim: "#6c665f", door: "#241c19", awning: COLORS.gold }],
+      [1240, 250, 132, 86, { roof: "#6a2845", wall: "#d4b483", trim: "#7a5230", door: "#241c19", awning: COLORS.posterPink }],
+      [1360, 150, 128, 86, { roof: "#394b7a", wall: "#c8b878", trim: "#6c665f", door: "#2b2638", awning: COLORS.gold }],
+      [1168, 820, 128, 82, { roof: "#4e4744", wall: "#9a9084", trim: "#6c665f", door: "#241c19", awning: COLORS.posterPurple }],
+      [1418, 494, 126, 78, { roof: "#8f4535", wall: "#b8aa77", trim: "#6c665f", door: "#17111d", awning: COLORS.danger }],
+      [270, 890, 130, 78, { roof: "#2e6555", wall: "#c8b878", trim: "#7a5230", door: "#3a2638", awning: COLORS.leafLight }],
+      [1312, 914, 134, 76, { roof: "#4e4744", wall: "#d4b483", trim: "#7a5230", door: "#241c19", awning: COLORS.posterBlue }]
+    ];
+    for (const [x, y, w, h, palette] of buildings) {
+      if (isRectVisible(x, y, w, h, 96)) drawPixelBuilding(x, y, w, h, palette);
+    }
+
+    const newsstands = [[602, 176], [238, 500], [830, 266], [1370, 214], [1188, 864]];
+    for (const [x, y] of newsstands) {
+      if (isRectVisible(x, y, 54, 46, 80)) drawPixelNewsstand(x, y);
+    }
+
+    const awnings = [
+      [650, 102, 90, COLORS.posterPink], [680, 452, 118, COLORS.posterBlue],
+      [870, 120, 128, COLORS.posterBlue], [950, 424, 138, COLORS.posterPurple],
+      [438, 722, 124, COLORS.posterPink], [1240, 282, 132, COLORS.posterPink],
+      [1360, 182, 128, COLORS.gold], [1168, 852, 128, COLORS.posterPurple],
+      [1418, 526, 126, COLORS.danger], [270, 922, 130, COLORS.leafLight],
+      [1312, 946, 134, COLORS.posterBlue]
+    ];
+    for (const [x, y, w, color] of awnings) {
+      if (isRectVisible(x, y, w, 18, 96)) drawAwning(x, y, w, color);
+    }
+
+    const vehicles = [
+      ["redCar", 0, 48, 48, 48, 598, 214, 38, 38],
+      ["blueCar", 0, 48, 48, 48, 768, 360, 38, 38],
+      ["redCar", 0, 96, 48, 48, 710, 206, 34, 34],
+      ["blueCar", 0, 144, 48, 48, 78, 520, 34, 34],
+      ["redCar", 0, 48, 48, 48, 928, 252, 36, 36],
+      ["blueCar", 0, 96, 48, 48, 1070, 530, 36, 36],
+      ["redCar", 0, 144, 48, 48, 622, 690, 34, 34],
+      ["blueCar", 0, 48, 48, 48, 1240, 396, 38, 38],
+      ["redCar", 0, 96, 48, 48, 1450, 612, 36, 36],
+      ["blueCar", 0, 144, 48, 48, 1160, 842, 34, 34],
+      ["redCar", 0, 48, 48, 48, 310, 1010, 36, 36],
+      ["blueCar", 0, 96, 48, 48, 1320, 1010, 36, 36]
+    ];
+    for (const vehicle of vehicles) {
+      if (isRectVisible(vehicle[5], vehicle[6], vehicle[7], vehicle[8], 80)) drawVehicle(...vehicle);
+    }
   }
 
   function drawMapProps() {
     for (const prop of MAP.props) {
+      if (!isPointVisible(prop.x, prop.y, 48)) continue;
       ctx.save();
       ctx.translate(Math.round(prop.x), Math.round(prop.y));
       drawSpriteShadow(0, 12, 9, 3);
@@ -4125,6 +4598,7 @@
     for (const b of MAP.benches) {
       const x = b.x * TILE;
       const y = b.y * TILE;
+      if (!isRectVisible(x, y, b.w * TILE, b.h * TILE, 36)) continue;
       ctx.fillStyle = "rgba(23,17,29,0.22)";
       ctx.fillRect(x + 2, y + 17, b.w * TILE - 4, 4);
       ctx.fillStyle = COLORS.wood;
@@ -4140,6 +4614,7 @@
     for (const t of MAP.trees) {
       const x = t.x * TILE;
       const y = t.y * TILE;
+      if (!isRectVisible(x, y, TILE, TILE, 48)) continue;
       ctx.fillStyle = "rgba(23,17,29,0.20)";
       ctx.fillRect(x + 2, y + 17, 18, 5);
       ctx.fillStyle = COLORS.wood;
@@ -4160,6 +4635,7 @@
 
   function drawSigns() {
     for (const sign of MAP.signs) {
+      if (!isPointVisible(sign.x, sign.y, 72)) continue;
       ctx.fillStyle = COLORS.wood;
       ctx.fillRect(sign.x, sign.y + 14, 4, 18);
       ctx.fillStyle = COLORS.gold;
@@ -4172,6 +4648,7 @@
 
   function drawPosters() {
     for (const poster of MAP.posters) {
+      if (!isPointVisible(poster.x, poster.y, 48)) continue;
       const color = COLORS[poster.color] || poster.color || COLORS.posterBlue;
       ctx.fillStyle = "rgba(23,17,29,0.28)";
       ctx.fillRect(poster.x + 2, poster.y + 2, 26, 14);
@@ -4187,6 +4664,7 @@
 
   function drawEasterEggs() {
     for (const egg of MAP.easterEggs) {
+      if (!isPointVisible(egg.x, egg.y, 56)) continue;
       const discovered = game.discoveredEggs && game.discoveredEggs.has(egg.id);
       drawEasterEggMarker(egg, discovered);
     }
@@ -4288,6 +4766,7 @@
 
   function drawStreetLamps() {
     for (const lamp of MAP.lamps) {
+      if (!isPointVisible(lamp.x, lamp.y, 72)) continue;
       const lit = game.runMode === "survival" || game.round >= 1;
       if (lit) {
         ctx.save();
@@ -5098,26 +5577,77 @@
     document.body.dataset.runMode = "intro";
     introActive = true;
     introOverlay.hidden = false;
+    const beats = INTRO_STORY.map(introBeatMarkup).join("");
     introOverlay.innerHTML = `
       <div class="intro-card" role="dialog" aria-modal="true" aria-label="Intro La Razzia">
         <div class="intro-file"><span>EXPEDIENTE 1966</span><span>RESERVADO</span></div>
-        <div class="intro-scene" aria-hidden="true">
-          <span class="intro-kiosk"></span>
-          <span class="intro-station"></span>
-          <span class="intro-fountain"></span>
-          <span class="intro-car"></span>
-          <span class="intro-cop"></span>
-          <span class="intro-hippie"></span>
-          <span class="intro-crowd"><span></span><span></span><span></span></span>
-          <span class="intro-stamp">RAZZIA</span>
-        </div>
+        <div class="intro-strip" aria-hidden="true">${beats}</div>
         <div class="intro-title">La Razzia</div>
-        <div class="intro-caption">Plaza San Martín. Pelo largo, patrulla cerca, rumor en marcha.</div>
+        <div class="intro-caption">Una historia rápida de archivo, plaza y persecución.</div>
         <button class="intro-skip" type="button" data-intro-action="skip">Saltar</button>
       </div>
     `;
     clearTimeout(introTimer);
-    introTimer = window.setTimeout(() => finishIntro(), 4800);
+    introTimer = window.setTimeout(() => finishIntro(), INTRO_DURATION);
+  }
+
+  function introBeatMarkup(beat, index) {
+    const beatDelay = (index * 0.72).toFixed(2);
+    const scanDelay = (index * 0.35).toFixed(2);
+    const panDelay = (index * 0.24).toFixed(2);
+    return `
+      <section class="intro-beat intro-scene-${escapeHtml(beat.scene)}" data-label="${escapeHtml(beat.label)}" style="--beat-delay:${beatDelay}s;--scan-delay:${scanDelay}s;--pan-delay:${panDelay}s">
+        <div class="intro-scene-stage">${introSceneMarkup(beat.scene)}</div>
+        <div class="intro-caption-card">${escapeHtml(beat.caption)}</div>
+      </section>
+    `;
+  }
+
+  function introSceneMarkup(scene) {
+    if (scene === "file") {
+      return `
+        <span class="intro-paper"></span>
+        <span class="intro-record"></span>
+        <span class="intro-leaf"></span>
+        <span class="intro-person hippie" style="left:72%;bottom:30%"></span>
+      `;
+    }
+    if (scene === "florida") {
+      return `
+        <span class="intro-kiosk" style="left:8%;top:22%"></span>
+        <span class="intro-building" style="right:8%;top:15%"></span>
+        <span class="intro-record" style="left:45%;top:34%"></span>
+        <span class="intro-paper" style="left:30%;top:26%;transform:rotate(-8deg)"></span>
+      `;
+    }
+    if (scene === "walk") {
+      return `
+        <span class="intro-fountain"></span>
+        <span class="intro-lamp"></span>
+        <span class="intro-person hippie"></span>
+      `;
+    }
+    if (scene === "patrol") {
+      return `
+        <span class="intro-building" style="right:7%;top:12%"></span>
+        <span class="intro-car"></span>
+        <span class="intro-person cop"></span>
+        <span class="intro-person hippie" style="left:18%;bottom:28%"></span>
+      `;
+    }
+    if (scene === "crowd") {
+      return `
+        <span class="intro-fountain" style="left:28%;top:42%"></span>
+        <span class="intro-crowd"><span></span><span></span><span></span><span></span></span>
+        <span class="intro-leaf" style="right:18%;top:22%"></span>
+      `;
+    }
+    return `
+      <span class="intro-title-card">La Razzia</span>
+      <span class="intro-paper" style="left:14%;top:26%;transform:rotate(8deg)"></span>
+      <span class="intro-crowd" style="left:58%;bottom:24%;opacity:1"><span></span><span></span><span></span><span></span></span>
+      <span class="intro-stamp">RAZZIA</span>
+    `;
   }
 
   function finishIntro() {
@@ -5316,7 +5846,7 @@
     const found = MAP.easterEggs.filter((egg) => archive.has(egg.id)).slice(-3);
     const label = found.length
       ? found.map((egg) => escapeHtml(egg.label)).join(" · ")
-      : "Todavía sin hallazgos. El mapa guarda 17 pistas.";
+      : `Todavía sin hallazgos. El mapa guarda ${total} pistas.`;
     return `
       <div class="archive-shelf">
         <strong>Archivos ${count}/${total}</strong>
