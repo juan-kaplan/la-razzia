@@ -102,7 +102,7 @@
     min-width: 0;
     min-height: 1.45rem;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 0.35rem;
     padding: 0.08rem 0.3rem;
@@ -138,6 +138,27 @@
 
   .notoriety-row.is-hot .notoriety-value {
     color: var(--danger);
+  }
+
+  .pause-button {
+    min-width: 2.65rem;
+    min-height: 2.65rem;
+    padding: 0.1rem 0.25rem;
+    border: 10px solid transparent;
+    border-image: var(--ui-yellow) 16 fill / 10px / 0 stretch;
+    background: transparent;
+    color: #211911;
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .pause-button.is-resume {
+    border-image-source: var(--ui-green);
+    color: #fff;
+  }
+
+  .pause-button[hidden] {
+    display: none;
   }
 
   .brand {
@@ -584,6 +605,330 @@
     font-size: 0.76rem;
   }
 
+  .pause-modal {
+    width: min(100%, 22rem);
+  }
+
+  .pause-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    margin: 0.55rem 0;
+    color: #f5edd8;
+    font-size: 0.74rem;
+    text-align: left;
+  }
+
+  .pause-stat {
+    padding: 0.35rem 0.45rem;
+    background: rgba(245,237,216,0.08);
+    border-left: 0.22rem solid #e8a030;
+  }
+
+  .pause-objective {
+    grid-column: 1 / -1;
+  }
+
+  .pause-hint {
+    color: #cfc2ae;
+    font-size: 0.7rem;
+  }
+
+  .boot-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: clamp(0.75rem, 2.5vmin, 1.5rem);
+    background:
+      radial-gradient(circle at 50% 36%, rgba(232,160,48,0.16), transparent 26rem),
+      linear-gradient(180deg, #171729, #10101c);
+    color: #f5edd8;
+    font-family: "Courier New", Courier, monospace;
+  }
+
+  .boot-intro[hidden] {
+    display: none;
+  }
+
+  .intro-card {
+    width: min(100%, 35rem);
+    position: relative;
+    overflow: hidden;
+    padding: 0.8rem;
+    background: rgba(26, 26, 46, 0.96);
+    border: 16px solid transparent;
+    border-image: var(--ui-brown) 16 fill / 16px / 0 stretch;
+    image-rendering: pixelated;
+  }
+
+  .intro-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    color: #ffe066;
+    font-size: clamp(0.72rem, 2.6vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .intro-file span:last-child {
+    color: #e9e0ce;
+  }
+
+  .intro-scene {
+    height: clamp(11rem, 42vw, 15rem);
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, transparent 0 42%, #c8b878 42% 58%, transparent 58%),
+      linear-gradient(0deg, transparent 0 47%, #d4b483 47% 58%, transparent 58%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 0.5rem, transparent 0.5rem 1rem),
+      #5a8a3c;
+    border: 8px solid transparent;
+    border-image: var(--ui-tan) 16 fill / 8px / 0 stretch;
+  }
+
+  .intro-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(245,237,216,0.28), transparent);
+    transform: translateX(-110%);
+    animation: intro-scan 4.8s steps(18, end) forwards;
+  }
+
+  .intro-station,
+  .intro-kiosk,
+  .intro-fountain,
+  .intro-car,
+  .intro-hippie,
+  .intro-cop,
+  .intro-crowd,
+  .intro-stamp {
+    position: absolute;
+    display: block;
+  }
+
+  .intro-station {
+    right: 9%;
+    top: 10%;
+    width: 4.1rem;
+    height: 3rem;
+    background: #6c665f;
+    border-top: 0.45rem solid #463f3d;
+    box-shadow: inset 0 -0.42rem 0 #4e4744;
+  }
+
+  .intro-station::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 0.65rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    background: #7cc6de;
+    box-shadow: 1rem 0 0 #7cc6de, 2rem 0 0 #7cc6de;
+  }
+
+  .intro-kiosk {
+    left: 7%;
+    top: 16%;
+    width: 4.8rem;
+    height: 2.65rem;
+    background: #4b8f75;
+    border-top: 0.42rem solid #2e6555;
+    box-shadow: inset 0 -0.4rem 0 #2e6555;
+  }
+
+  .intro-kiosk::before {
+    content: "";
+    position: absolute;
+    left: 0.45rem;
+    top: 0.58rem;
+    width: 0.58rem;
+    height: 0.7rem;
+    background: #f5edd8;
+    box-shadow: 1rem 0 0 #ffe066, 2rem 0 0 #f5edd8, 3rem 0 0 #ffe066;
+  }
+
+  .intro-fountain {
+    left: 50%;
+    top: 43%;
+    width: 3.4rem;
+    height: 3.4rem;
+    transform: translate(-50%, -50%);
+    background: #4a7ab8;
+    border: 0.35rem solid #837c72;
+    box-shadow: inset 0 0 0 0.35rem #7cc6de;
+  }
+
+  .intro-fountain::before {
+    content: "";
+    position: absolute;
+    left: 1.1rem;
+    top: 1.05rem;
+    width: 0.35rem;
+    height: 1rem;
+    background: #f5edd8;
+    box-shadow: -0.35rem 0.35rem 0 #f5edd8, 0.35rem 0.35rem 0 #f5edd8;
+  }
+
+  .intro-car {
+    right: 12%;
+    bottom: 18%;
+    width: 2.9rem;
+    height: 1.35rem;
+    background: #1a3a6e;
+    box-shadow: inset 0.5rem -0.35rem 0 #4a7ab8;
+    animation: intro-siren 0.65s steps(2, end) infinite;
+  }
+
+  .intro-car::before,
+  .intro-car::after {
+    content: "";
+    position: absolute;
+    bottom: -0.32rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    background: #17111d;
+  }
+
+  .intro-car::before { left: 0.35rem; }
+  .intro-car::after { right: 0.35rem; }
+
+  .intro-hippie,
+  .intro-cop,
+  .intro-crowd span {
+    width: 0.55rem;
+    height: 0.55rem;
+    background: #f5c880;
+    box-shadow:
+      0 0.55rem 0 #6b3fa0,
+      -0.18rem 1.1rem 0 #17111d,
+      0.18rem 1.1rem 0 #17111d,
+      0 -0.18rem 0 #7a3a1a;
+  }
+
+  .intro-hippie {
+    left: 9%;
+    bottom: 19%;
+    animation: intro-walk 4.8s steps(16, end) forwards;
+  }
+
+  .intro-cop {
+    right: 16%;
+    top: 39%;
+    box-shadow:
+      0 0.55rem 0 #1a3a6e,
+      -0.18rem 1.1rem 0 #17111d,
+      0.18rem 1.1rem 0 #17111d,
+      0 -0.18rem 0 #4a7ab8;
+    animation: intro-cop-look 4.8s steps(8, end) forwards;
+  }
+
+  .intro-crowd {
+    left: 42%;
+    bottom: 20%;
+    opacity: 0;
+    animation: intro-crowd 4.8s steps(3, end) forwards;
+  }
+
+  .intro-crowd span {
+    position: absolute;
+    background: #f5c880;
+  }
+
+  .intro-crowd span:nth-child(1) { left: -1.1rem; bottom: 0; }
+  .intro-crowd span:nth-child(2) { left: 0.2rem; bottom: 0.25rem; box-shadow: 0 0.55rem 0 #c8501a, -0.18rem 1.1rem 0 #17111d, 0.18rem 1.1rem 0 #17111d, 0 -0.18rem 0 #7a3a1a; }
+  .intro-crowd span:nth-child(3) { left: 1.45rem; bottom: -0.05rem; box-shadow: 0 0.55rem 0 #4b8f75, -0.18rem 1.1rem 0 #17111d, 0.18rem 1.1rem 0 #17111d, 0 -0.18rem 0 #38202c; }
+
+  .intro-stamp {
+    right: 7%;
+    bottom: 8%;
+    padding: 0.35rem 0.5rem;
+    border: 0.2rem solid #c64532;
+    color: #c64532;
+    font-weight: 700;
+    transform: rotate(-8deg) scale(0.2);
+    opacity: 0;
+    animation: intro-stamp 4.8s steps(5, end) forwards;
+  }
+
+  .intro-title {
+    margin-top: 0.6rem;
+    color: #ffe066;
+    font-size: clamp(1rem, 4.5vw, 1.55rem);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .intro-caption {
+    min-height: 1.2rem;
+    margin-top: 0.25rem;
+    color: #e9e0ce;
+    font-size: clamp(0.68rem, 2.4vw, 0.82rem);
+    text-align: center;
+  }
+
+  .intro-skip {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.75rem;
+    min-height: 2.35rem;
+    border: 10px solid transparent;
+    border-image: var(--ui-tan) 16 fill / 10px / 0 stretch;
+    background: transparent;
+    color: #241c19;
+    font-size: 0.76rem;
+  }
+
+  @keyframes intro-scan {
+    0% { transform: translateX(-110%); }
+    76% { transform: translateX(110%); }
+    100% { transform: translateX(110%); }
+  }
+
+  @keyframes intro-walk {
+    0% { transform: translateX(0); }
+    55% { transform: translateX(12rem); }
+    100% { transform: translateX(14rem); }
+  }
+
+  @keyframes intro-cop-look {
+    0%, 50% { transform: translateX(0); }
+    72%, 100% { transform: translateX(-1.6rem); }
+  }
+
+  @keyframes intro-crowd {
+    0%, 46% { opacity: 0; }
+    58%, 100% { opacity: 1; }
+  }
+
+  @keyframes intro-siren {
+    0% { box-shadow: inset 0.5rem -0.35rem 0 #4a7ab8, 0 -0.35rem 0 #c64532; }
+    100% { box-shadow: inset 0.5rem -0.35rem 0 #4a7ab8, 0 -0.35rem 0 #ffe066; }
+  }
+
+  @keyframes intro-stamp {
+    0%, 70% { opacity: 0; transform: rotate(-8deg) scale(0.2); }
+    84%, 100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-scene::before,
+    .intro-car,
+    .intro-hippie,
+    .intro-cop,
+    .intro-crowd,
+    .intro-stamp {
+      animation: none;
+    }
+  }
+
   .menu-quote {
     padding: 0.45rem 0.55rem;
     background: rgba(245, 237, 216, 0.08);
@@ -931,6 +1276,69 @@
       font-size: 0.62rem;
     }
 
+    .pause-button {
+      min-width: 2.35rem;
+      min-height: 2.35rem;
+      font-size: 0.68rem;
+    }
+
+    .pause-modal {
+      padding: 0.34rem;
+    }
+
+    .pause-modal h2 {
+      margin-bottom: 0.16rem;
+      font-size: 1rem;
+    }
+
+    .pause-hint {
+      display: none;
+    }
+
+    .pause-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.2rem;
+      margin: 0.22rem 0;
+      font-size: 0.58rem;
+    }
+
+    .pause-stat {
+      padding: 0.18rem 0.28rem;
+      line-height: 1.15;
+    }
+
+    .pause-objective {
+      grid-column: 1 / -1;
+    }
+
+    .pause-modal .actions {
+      gap: 0.18rem;
+      margin-top: 0.2rem;
+    }
+
+    .pause-modal .primary,
+    .pause-modal .secondary,
+    .pause-modal .tertiary {
+      flex: 1 1 0;
+      min-height: 1.75rem;
+      padding: 0.16rem 0.18rem;
+      font-size: 0.56rem;
+    }
+
+    .intro-card {
+      padding: 0.55rem;
+    }
+
+    .intro-scene {
+      height: 10.4rem;
+    }
+
+    .intro-skip {
+      position: static;
+      width: 100%;
+      margin-top: 0.45rem;
+    }
+
     .notoriety-track {
       height: 0.38rem;
     }
@@ -1032,6 +1440,7 @@
       <span class="notoriety-label"><span class="hud-icon" data-sprite="rumor" aria-hidden="true"></span><span id="notoriety-label">Rumor</span></span>
       <span class="notoriety-track" aria-hidden="true"><span id="notoriety-fill" class="notoriety-fill"></span></span>
       <span id="notoriety-value" class="notoriety-value">0%</span>
+      <button id="pause-button" class="pause-button" type="button" data-action="pause" aria-label="Pausar juego" hidden>II</button>
     </div>
   </section>
 
@@ -1052,6 +1461,7 @@
     <button id="control-mode" class="mode-chip" type="button" aria-label="Alternar modo de control">Tap</button>
   </section>
 </main>
+<div id="intro-overlay" class="boot-intro" hidden></div>
 
 <script>
 (() => {
@@ -1060,7 +1470,9 @@
   const canvas = document.getElementById("gc");
   const ctx = canvas.getContext("2d");
   const overlay = document.getElementById("overlay");
+  const introOverlay = document.getElementById("intro-overlay");
   const controlModeButton = document.getElementById("control-mode");
+  const pauseButton = document.getElementById("pause-button");
   const dpadButtons = [...document.querySelectorAll("[data-dir]")];
   const hud = {
     round: document.querySelector("#round-ui .hud-value"),
@@ -1091,6 +1503,7 @@
   const SURVIVAL_SCORE_KEY = "razzia_survival_scores";
   const CONVOCATORIA_SCORE_KEY = "razzia_convocatoria_scores";
   const ARCHIVE_KEY = "razzia_archive";
+  const INTRO_SESSION_KEY = "razzia_intro_seen";
   ctx.imageSmoothingEnabled = false;
 
   const ART_PATHS = {
@@ -2136,6 +2549,8 @@
   let blockedTiles = new Set();
   let rafId = null;
   let lastTime = 0;
+  let introTimer = null;
+  let introActive = false;
 
   function rebuildBlockedTiles() {
     blockedTiles = new Set();
@@ -2246,6 +2661,7 @@
     spawnPowerUp();
     spawnPowerUp();
     hideOverlay();
+    updatePauseButton();
     showMsg(objectiveText(cfg));
     updateHud();
     draw();
@@ -2304,6 +2720,51 @@
     } else {
       rafId = null;
     }
+  }
+
+  function togglePause() {
+    if (game.mode === "playing") {
+      pauseGame();
+    } else if (game.mode === "paused") {
+      resumeGame();
+    }
+  }
+
+  function pauseGame() {
+    if (game.mode !== "playing") return;
+    game.mode = "paused";
+    clearInput();
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    updatePauseButton();
+    showPauseOverlay();
+  }
+
+  function resumeGame() {
+    if (game.mode !== "paused") return;
+    hideOverlay();
+    game.mode = "playing";
+    clearInput();
+    updatePauseButton();
+    startLoop();
+  }
+
+  function clearInput() {
+    input.keys.clear();
+    input.dpad.dir = "";
+    input.dpad.x = 0;
+    input.dpad.y = 0;
+    for (const button of dpadButtons) button.classList.remove("is-held");
+  }
+
+  function updatePauseButton() {
+    const visible = game.mode === "playing" || game.mode === "paused";
+    pauseButton.hidden = !visible;
+    pauseButton.classList.toggle("is-resume", game.mode === "paused");
+    pauseButton.textContent = game.mode === "paused" ? ">" : "II";
+    pauseButton.setAttribute("aria-label", game.mode === "paused" ? "Reanudar juego" : "Pausar juego");
   }
 
   function update(dt) {
@@ -4620,8 +5081,80 @@
     game.msgKind = kind;
   }
 
+  function startIntroOrMenu() {
+    if (introWasSeen() || prefersReducedMotion()) {
+      markIntroSeen();
+      showMenu();
+      return;
+    }
+    showIntro();
+  }
+
+  function showIntro() {
+    game.mode = "intro";
+    clearInput();
+    hideOverlay();
+    updatePauseButton();
+    document.body.dataset.runMode = "intro";
+    introActive = true;
+    introOverlay.hidden = false;
+    introOverlay.innerHTML = `
+      <div class="intro-card" role="dialog" aria-modal="true" aria-label="Intro La Razzia">
+        <div class="intro-file"><span>EXPEDIENTE 1966</span><span>RESERVADO</span></div>
+        <div class="intro-scene" aria-hidden="true">
+          <span class="intro-kiosk"></span>
+          <span class="intro-station"></span>
+          <span class="intro-fountain"></span>
+          <span class="intro-car"></span>
+          <span class="intro-cop"></span>
+          <span class="intro-hippie"></span>
+          <span class="intro-crowd"><span></span><span></span><span></span></span>
+          <span class="intro-stamp">RAZZIA</span>
+        </div>
+        <div class="intro-title">La Razzia</div>
+        <div class="intro-caption">Plaza San Martín. Pelo largo, patrulla cerca, rumor en marcha.</div>
+        <button class="intro-skip" type="button" data-intro-action="skip">Saltar</button>
+      </div>
+    `;
+    clearTimeout(introTimer);
+    introTimer = window.setTimeout(() => finishIntro(), 4800);
+  }
+
+  function finishIntro() {
+    if (!introActive && introOverlay.hidden) return;
+    clearTimeout(introTimer);
+    introTimer = null;
+    introActive = false;
+    markIntroSeen();
+    introOverlay.hidden = true;
+    introOverlay.innerHTML = "";
+    showMenu();
+  }
+
+  function introWasSeen() {
+    try {
+      return sessionStorage.getItem(INTRO_SESSION_KEY) === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function markIntroSeen() {
+    try {
+      sessionStorage.setItem(INTRO_SESSION_KEY, "1");
+    } catch (error) {
+      // Session storage can be unavailable in private or embedded contexts.
+    }
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
   function showMenu() {
     game.mode = "menu";
+    clearInput();
+    updatePauseButton();
     document.body.dataset.runMode = "menu";
     overlay.hidden = false;
     overlay.innerHTML = `
@@ -4673,6 +5206,7 @@
   function showStory(nextRound) {
     const cfg = ROUND_CONFIGS[nextRound];
     const quote = PUJOL_QUOTES[cfg.quote];
+    updatePauseButton();
     overlay.hidden = false;
     overlay.innerHTML = `
       <div class="modal">
@@ -4696,6 +5230,7 @@
         ? "Otra convocatoria"
         : "Jugar de nuevo";
     const modeName = modeLabel(game.runMode);
+    updatePauseButton();
     overlay.hidden = false;
     overlay.innerHTML = `
       <div class="modal">
@@ -4711,6 +5246,31 @@
       </div>
     `;
     applyPixelIcons(overlay);
+  }
+
+  function showPauseOverlay() {
+    const cfg = currentConfig();
+    overlay.hidden = false;
+    overlay.innerHTML = `
+      <div class="modal pause-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <h2 id="pause-title">Pausa</h2>
+        <p class="pause-hint">El juego queda congelado. P o Escape para volver.</p>
+        <div class="pause-stats">
+          <div class="pause-stat">Modo<br><strong>${escapeHtml(modeLabel(game.runMode))}</strong></div>
+          <div class="pause-stat">Puntos<br><strong>${game.score}</strong></div>
+          <div class="pause-stat">Tiempo<br><strong>${Math.floor(game.totalTime)}s</strong></div>
+          <div class="pause-stat">Hippies<br><strong>${game.hippiesTotal}</strong></div>
+          <div class="pause-stat pause-objective">Objetivo<br><strong>${escapeHtml(objectiveProgressText(cfg))}</strong></div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="button" data-action="resume">Reanudar</button>
+          <button class="secondary" type="button" data-action="restart">Reiniciar</button>
+          <button class="tertiary" type="button" data-action="menu">Menú</button>
+        </div>
+      </div>
+    `;
+    const resume = overlay.querySelector("[data-action='resume']");
+    if (resume) resume.focus({ preventScroll: true });
   }
 
   function hideOverlay() {
@@ -4958,23 +5518,59 @@
     const button = e.target.closest("button[data-action]");
     if (!button) return;
     const action = button.dataset.action;
+    if (action === "resume") resumeGame();
+    if (action === "restart") resetGame(game.runMode || "story");
     if (action === "start") resetGame(button.dataset.mode || game.runMode || "story");
     if (action === "continue") setupRound(Number(button.dataset.round));
     if (action === "menu") showMenu();
   });
 
+  introOverlay.addEventListener("click", (e) => {
+    if (e.target.closest("[data-intro-action='skip']")) finishIntro();
+  });
+
   canvas.addEventListener("pointerdown", handlePointer);
+
+  pauseButton.addEventListener("click", () => {
+    togglePause();
+  });
 
   window.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
+    if (introActive && ["enter", " ", "escape"].includes(key)) {
+      e.preventDefault();
+      finishIntro();
+      return;
+    }
+    if (key === "p" && (game.mode === "playing" || game.mode === "paused")) {
+      e.preventDefault();
+      togglePause();
+      return;
+    }
+    if (key === "escape") {
+      if (game.mode === "playing") {
+        e.preventDefault();
+        pauseGame();
+        return;
+      }
+      if (game.mode === "paused") {
+        e.preventDefault();
+        resumeGame();
+        return;
+      }
+    }
     if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
       if (game.mode === "playing") e.preventDefault();
-      input.keys.add(key);
+      if (game.mode === "playing") input.keys.add(key);
     }
   });
 
   window.addEventListener("keyup", (e) => {
     input.keys.delete(e.key.toLowerCase());
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && game.mode === "playing") pauseGame();
   });
 
   for (const button of dpadButtons) {
@@ -5012,7 +5608,7 @@
 
   rebuildBlockedTiles();
   applyPixelIcons();
-  showMenu();
+  startIntroOrMenu();
   loadArtAssets();
 })();
 </script>
