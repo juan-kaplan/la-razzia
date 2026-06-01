@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>La Razzia - Buenos Aires, 1966</title>
+<style>
+%%STYLE%%
+</style>
+</head>
+<body>
+<main class="game-container" aria-label="La Razzia">
+  <section id="ui" aria-live="polite">
+    <div class="ui-row">
+      <span id="round-ui" class="hud-pill"><span class="hud-icon" data-sprite="round" aria-hidden="true"></span><span class="hud-value">R1: 1966</span></span>
+      <span class="brand">La Razzia</span>
+      <span id="hair-ui" class="hud-pill"><span class="hud-icon" data-sprite="hair" aria-hidden="true"></span><span class="hud-value">Pelo ✦✦✦</span></span>
+    </div>
+    <div class="ui-row compact">
+      <span id="objective-ui" class="hud-pill"><span class="hud-icon" data-sprite="objective" aria-hidden="true"></span><span class="hud-value">0/3 · 55s</span></span>
+      <span id="power-ui" class="hud-pill"><span class="hud-icon" data-sprite="power" aria-hidden="true"></span><span class="hud-value">Libre</span></span>
+      <span id="score-ui" class="hud-pill"><span class="hud-icon" data-sprite="score" aria-hidden="true"></span><span class="hud-value">0 pts</span></span>
+    </div>
+    <div id="notoriety-ui" class="notoriety-row">
+      <span class="notoriety-label"><span class="hud-icon" data-sprite="rumor" aria-hidden="true"></span><span id="notoriety-label">Rumor</span></span>
+      <span class="notoriety-track" aria-hidden="true"><span id="notoriety-fill" class="notoriety-fill"></span></span>
+      <span id="notoriety-value" class="notoriety-value">0%</span>
+      <button id="pause-button" class="pause-button" type="button" data-action="pause" aria-label="Pausar juego" hidden>II</button>
+      <button id="mute-button" class="pause-button" type="button" data-action="mute" aria-label="Silenciar sonido">♪</button>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <canvas id="gc" width="540" height="380" aria-label="Juego de persecución en una plaza porteña"></canvas>
+    <div id="overlay"></div>
+  </div>
+
+  <div id="msg"><span class="msg-icon" data-sprite="quote" aria-hidden="true"></span><span id="msg-text">Reunite con otros hippies - te reconocen por la campera.</span></div>
+  <section id="touch-controls" class="touch-controls" aria-label="Controles táctiles">
+    <div class="dpad" aria-label="Movimiento">
+      <button class="dpad-up" type="button" data-dir="up" aria-label="Mover arriba">▲</button>
+      <button class="dpad-left" type="button" data-dir="left" aria-label="Mover izquierda">◀</button>
+      <button class="dpad-right" type="button" data-dir="right" aria-label="Mover derecha">▶</button>
+      <button class="dpad-down" type="button" data-dir="down" aria-label="Mover abajo">▼</button>
+    </div>
+    <div class="control-note">Tap en el mapa o D-pad. En teclado: WASD / flechas.</div>
+    <button id="control-mode" class="mode-chip" type="button" aria-label="Alternar modo de control">Tap</button>
+  </section>
+</main>
+<div id="intro-overlay" class="boot-intro" hidden></div>
+
+<script>
+%%SCRIPT%%
+</script>
+</body>
+</html>
