@@ -1730,7 +1730,6 @@
   const CONVOCATORIA_SCORE_KEY = "razzia_convocatoria_scores";
   const ARCHIVE_KEY = "razzia_archive";
   const INTRO_SESSION_KEY = "razzia_intro_seen";
-  const INTRO_DURATION = 6200;
   ctx.imageSmoothingEnabled = false;
 
   const ART_PATHS = {
@@ -3009,7 +3008,6 @@
   let blockedTiles = new Set();
   let rafId = null;
   let lastTime = 0;
-  let introTimer = null;
   let introActive = false;
 
   function rebuildBlockedTiles() {
@@ -5584,11 +5582,9 @@
         <div class="intro-strip" aria-hidden="true">${beats}</div>
         <div class="intro-title">La Razzia</div>
         <div class="intro-caption">Una historia rápida de archivo, plaza y persecución.</div>
-        <button class="intro-skip" type="button" data-intro-action="skip">Saltar</button>
+        <button class="intro-skip" type="button" data-intro-action="continue">Continuar</button>
       </div>
     `;
-    clearTimeout(introTimer);
-    introTimer = window.setTimeout(() => finishIntro(), INTRO_DURATION);
   }
 
   function introBeatMarkup(beat, index) {
@@ -5652,8 +5648,6 @@
 
   function finishIntro() {
     if (!introActive && introOverlay.hidden) return;
-    clearTimeout(introTimer);
-    introTimer = null;
     introActive = false;
     markIntroSeen();
     introOverlay.hidden = true;
@@ -6056,7 +6050,7 @@
   });
 
   introOverlay.addEventListener("click", (e) => {
-    if (e.target.closest("[data-intro-action='skip']")) finishIntro();
+    if (e.target.closest("[data-intro-action]")) finishIntro();
   });
 
   canvas.addEventListener("pointerdown", handlePointer);
