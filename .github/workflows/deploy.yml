@@ -28,6 +28,14 @@ jobs:
         with:
           enablement: true
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build index.html
+        run: node build.js
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
