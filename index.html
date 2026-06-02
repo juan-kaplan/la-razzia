@@ -6192,6 +6192,7 @@
     drawViewportEffects();
     drawWorldFloaters();
     drawOffscreenIndicators();
+    drawDisguiseHint();
     drawObjectiveCard();
     drawMiniMap();
     if (game._debugMap) drawDebugMapOverlay();
@@ -7637,6 +7638,55 @@
       ctx.fillText(floater.text, sx + 1, sy + 1);
       ctx.fillStyle = floater.color;
       ctx.fillText(floater.text, sx, sy);
+    }
+    ctx.restore();
+  }
+
+  function drawDisguiseHint() {
+    if (!game.disguiseReady && !game.disguised) return;
+    if (game.mode !== "playing") return;
+
+    const PAD = 8;
+    const W_BOX = 58;
+    const H_BOX = 42;
+    const x = PAD;
+    const y = H - H_BOX - PAD;
+
+    ctx.save();
+    // Background panel
+    ctx.globalAlpha = 0.82;
+    ctx.fillStyle = game.disguised ? "#183d1e" : "#1a1412";
+    ctx.fillRect(x, y, W_BOX, H_BOX);
+    ctx.strokeStyle = game.disguised ? COLORS.poncho : COLORS.gold;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x + 0.75, y + 0.75, W_BOX - 1.5, H_BOX - 1.5);
+    ctx.globalAlpha = 1;
+
+    // Sombrero sprite (6×7 pixels, scale 3)
+    const sprite = SPRITES.power.sombrero;
+    const palette = powerPalette("sombrero");
+    const sprScale = 3;
+    const sprW = sprite[0].length * sprScale;
+    const sprX = x + Math.floor((W_BOX - sprW) / 2);
+    const sprY = y + 4;
+    for (let row = 0; row < sprite.length; row++) {
+      for (let col = 0; col < sprite[row].length; col++) {
+        const ch = sprite[row][col];
+        if (ch === ".") continue;
+        ctx.fillStyle = palette[ch] || COLORS.gold;
+        ctx.fillRect(sprX + col * sprScale, sprY + row * sprScale, sprScale, sprScale);
+      }
+    }
+
+    // Key hint
+    ctx.font = `700 9px "Courier New", monospace`;
+    ctx.textAlign = "center";
+    if (game.disguised) {
+      ctx.fillStyle = COLORS.poncho;
+      ctx.fillText("ACTIVO", x + W_BOX / 2, y + H_BOX - 5);
+    } else {
+      ctx.fillStyle = COLORS.gold;
+      ctx.fillText("[Q] usar", x + W_BOX / 2, y + H_BOX - 5);
     }
     ctx.restore();
   }
