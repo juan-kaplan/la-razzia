@@ -6,6 +6,7 @@
   const overlay = document.getElementById("overlay");
   const introOverlay = document.getElementById("intro-overlay");
   const controlModeButton = document.getElementById("control-mode");
+  const disguiseButton = document.getElementById("disguise-button");
   const pauseButton = document.getElementById("pause-button");
   const muteButton = document.getElementById("mute-button");
   const dpadButtons = [...document.querySelectorAll("[data-dir]")];
@@ -286,11 +287,11 @@
       message: "El fanzine corre de mano: la cana aparece en el mapa."
     },
     sombrero: {
-      label: "Sombrero",
+      label: "Disfraz civil",
       short: "Disfraz",
       duration: 5,
-      color: COLORS.gold,
-      message: "El sombrero te disfraza: la policía no te reconoce."
+      color: COLORS.executiveLight,
+      message: "Disfraz listo: activalo con Q cuando la cana cierre."
     }
   };
 
@@ -329,6 +330,13 @@
       modes: ["story", "survival", "convocatoria"],
       minRound: 1,
       weight: 2
+    },
+    {
+      type: "zona_razzia",
+      label: "Zona cerrada",
+      modes: ["story", "survival", "convocatoria"],
+      minRound: 1,
+      weight: 2
     }
   ];
 
@@ -363,6 +371,13 @@
       life: 28,
       radius: 17,
       color: COLORS.executiveLight
+    },
+    infiltrado: {
+      label: "Infiltrado",
+      speed: 38,
+      life: 999,
+      radius: 22,
+      color: COLORS.allyLight
     }
   };
 
@@ -394,6 +409,12 @@
       [{ x: 23, y: 2 }, { x: 18, y: 8 }, { x: 13, y: 14 }, { x: 8, y: 24 }],
       [{ x: 74, y: 20 }, { x: 70, y: 28 }, { x: 64, y: 34 }, { x: 58, y: 44 }],
       [{ x: 62, y: 51 }, { x: 48, y: 44 }, { x: 38, y: 36 }, { x: 30, y: 46 }]
+    ],
+    infiltrado: [
+      [{ x: 7, y: 14 }, { x: 13, y: 11 }, { x: 20, y: 14 }, { x: 12, y: 18 }],
+      [{ x: 29, y: 10 }, { x: 35, y: 18 }, { x: 28, y: 23 }, { x: 22, y: 17 }],
+      [{ x: 61, y: 14 }, { x: 68, y: 22 }, { x: 63, y: 29 }, { x: 57, y: 22 }],
+      [{ x: 46, y: 22 }, { x: 52, y: 25 }, { x: 49, y: 31 }, { x: 43, y: 26 }]
     ]
   };
 
@@ -408,9 +429,9 @@
   ];
 
   const ARCHETYPES = {
-    musico:     { label: "Músico",     desc: "Corre más rápido.",             speed: 145, collectRadius: 19, lives: 3 },
-    poeta:      { label: "Poeta",      desc: "Detecta compañeros de lejos.",   speed: 116, collectRadius: 30, lives: 3 },
-    estudiante: { label: "Estudiante", desc: "Empieza con vida extra.",         speed: 116, collectRadius: 19, lives: 4 }
+    musico:     { label: "Músico",     desc: "Velocidad alta.",      stat: "Corre más rápido.",        speed: 145, collectRadius: 19, lives: 3 },
+    poeta:      { label: "Poeta",      desc: "Radio amplio.",        stat: "Reúne desde más lejos.",    speed: 116, collectRadius: 30, lives: 3 },
+    estudiante: { label: "Estudiante", desc: "Vida extra.",          stat: "Aguanta una captura más.",  speed: 116, collectRadius: 19, lives: 4 }
   };
 
   const DISTRICTS = {
@@ -425,18 +446,19 @@
       subtitle: "Plaza tranquila",
       quote: 3,
       objective: { type: "collect", target: 3, timeLimit: 55 },
-      cops: 2,
+      cops: 3,
       copSpeed: 42,
       chaseBonus: 26,
       detection: 72,
       allies: 3,
       maxAllies: 3,
-      powerups: ["press", "beatles", "poncho", "flyer", "mate"],
+      powerups: ["press", "beatles", "poncho", "flyer", "mate", "sombrero"],
       district: "plaza",
       safeSeconds: 7,
       patrols: [
-        [{ x: 4, y: 3 }, { x: 20, y: 3 }, { x: 20, y: 15 }, { x: 4, y: 15 }],
-        [{ x: 22, y: 14 }, { x: 18, y: 11 }, { x: 18, y: 4 }, { x: 22, y: 4 }]
+        [{ x: 4, y: 9 }, { x: 12, y: 9 }, { x: 20, y: 9 }, { x: 20, y: 23 }, { x: 12, y: 23 }, { x: 4, y: 23 }],
+        [{ x: 31, y: 8 }, { x: 38, y: 8 }, { x: 47, y: 10 }, { x: 47, y: 23 }, { x: 38, y: 23 }, { x: 31, y: 14 }],
+        [{ x: 20, y: 36 }, { x: 31, y: 38 }, { x: 38, y: 38 }, { x: 31, y: 45 }, { x: 22, y: 45 }]
       ]
     },
     {
@@ -444,7 +466,7 @@
       subtitle: "Julio de 1966",
       quote: 0,
       objective: { type: "collect", target: 5, timeLimit: 65 },
-      cops: 3,
+      cops: 4,
       copSpeed: 62,
       chaseBonus: 38,
       detection: 98,
@@ -454,9 +476,10 @@
       district: "florida",
       safeSeconds: 6,
       patrols: [
-        [{ x: 30, y: 5 }, { x: 40, y: 5 }, { x: 40, y: 14 }, { x: 30, y: 14 }],
-        [{ x: 28, y: 12 }, { x: 36, y: 8 }, { x: 44, y: 12 }, { x: 36, y: 16 }],
-        [{ x: 32, y: 4 }, { x: 42, y: 4 }, { x: 42, y: 16 }, { x: 32, y: 16 }]
+        [{ x: 31, y: 8 }, { x: 38, y: 8 }, { x: 47, y: 10 }, { x: 47, y: 16 }, { x: 38, y: 16 }, { x: 31, y: 14 }],
+        [{ x: 31, y: 23 }, { x: 38, y: 23 }, { x: 47, y: 25 }, { x: 47, y: 34 }, { x: 38, y: 34 }, { x: 31, y: 34 }],
+        [{ x: 58, y: 14 }, { x: 72, y: 14 }, { x: 72, y: 28 }, { x: 64, y: 28 }, { x: 63, y: 16 }],
+        [{ x: 8, y: 45 }, { x: 14, y: 47 }, { x: 22, y: 45 }, { x: 28, y: 47 }, { x: 31, y: 40 }, { x: 20, y: 38 }]
       ]
     },
     {
@@ -464,7 +487,7 @@
       subtitle: "Máxima represión",
       quote: 2,
       objective: { type: "survive", duration: 45 },
-      cops: 4,
+      cops: 6,
       copSpeed: 70,
       chaseBonus: 45,
       detection: 112,
@@ -474,10 +497,12 @@
       district: "costanera",
       safeSeconds: 5,
       patrols: [
-        [{ x: 58, y: 18 }, { x: 68, y: 18 }, { x: 68, y: 28 }, { x: 58, y: 28 }],
-        [{ x: 60, y: 16 }, { x: 70, y: 20 }, { x: 66, y: 30 }, { x: 56, y: 26 }],
-        [{ x: 55, y: 20 }, { x: 65, y: 16 }, { x: 72, y: 24 }, { x: 62, y: 32 }],
-        [{ x: 57, y: 26 }, { x: 67, y: 22 }, { x: 73, y: 28 }, { x: 63, y: 34 }]
+        [{ x: 47, y: 23 }, { x: 58, y: 23 }, { x: 64, y: 28 }, { x: 72, y: 30 }, { x: 64, y: 34 }, { x: 58, y: 38 }, { x: 47, y: 38 }],
+        [{ x: 63, y: 14 }, { x: 72, y: 14 }, { x: 72, y: 28 }, { x: 65, y: 38 }, { x: 63, y: 28 }],
+        [{ x: 58, y: 43 }, { x: 70, y: 43 }, { x: 72, y: 51 }, { x: 64, y: 51 }, { x: 56, y: 45 }],
+        [{ x: 8, y: 45 }, { x: 14, y: 47 }, { x: 22, y: 45 }, { x: 28, y: 47 }, { x: 31, y: 40 }, { x: 20, y: 38 }],
+        [{ x: 4, y: 9 }, { x: 12, y: 9 }, { x: 20, y: 9 }, { x: 20, y: 23 }, { x: 12, y: 23 }, { x: 4, y: 23 }],
+        [{ x: 31, y: 23 }, { x: 38, y: 23 }, { x: 47, y: 25 }, { x: 47, y: 34 }, { x: 38, y: 34 }, { x: 31, y: 34 }]
       ]
     }
   ];
@@ -487,7 +512,7 @@
     subtitle: "Oleada interminable",
     quote: 2,
     objective: { type: "endless" },
-    cops: 3,
+    cops: 5,
     copSpeed: 54,
     chaseBonus: 34,
     detection: 88,
@@ -496,13 +521,13 @@
     powerups: ["press", "beatles", "poncho", "flyer", "mate", "fanzine", "sombrero"],
     safeSeconds: 8,
     patrols: [
-      [{ x: 4, y: 4 }, { x: 22, y: 4 }, { x: 32, y: 11 }, { x: 8, y: 23 }],
-      [{ x: 38, y: 5 }, { x: 31, y: 17 }, { x: 18, y: 24 }, { x: 37, y: 27 }],
-      [{ x: 6, y: 27 }, { x: 14, y: 16 }, { x: 26, y: 8 }, { x: 40, y: 19 }],
-      [{ x: 17, y: 4 }, { x: 36, y: 8 }, { x: 35, y: 24 }, { x: 17, y: 27 }],
-      [{ x: 5, y: 14 }, { x: 21, y: 14 }, { x: 31, y: 22 }, { x: 10, y: 28 }],
-      [{ x: 58, y: 15 }, { x: 70, y: 18 }, { x: 74, y: 30 }, { x: 60, y: 34 }],
-      [{ x: 62, y: 51 }, { x: 48, y: 45 }, { x: 38, y: 38 }, { x: 70, y: 45 }]
+      [{ x: 4, y: 9 }, { x: 12, y: 9 }, { x: 20, y: 9 }, { x: 20, y: 23 }, { x: 12, y: 23 }, { x: 4, y: 23 }],
+      [{ x: 31, y: 8 }, { x: 38, y: 8 }, { x: 47, y: 10 }, { x: 47, y: 23 }, { x: 38, y: 23 }, { x: 31, y: 14 }],
+      [{ x: 58, y: 43 }, { x: 70, y: 43 }, { x: 72, y: 51 }, { x: 64, y: 51 }, { x: 56, y: 45 }],
+      [{ x: 47, y: 23 }, { x: 58, y: 23 }, { x: 64, y: 28 }, { x: 72, y: 30 }, { x: 64, y: 34 }, { x: 58, y: 38 }, { x: 47, y: 38 }],
+      [{ x: 8, y: 45 }, { x: 14, y: 47 }, { x: 22, y: 45 }, { x: 28, y: 47 }, { x: 31, y: 40 }, { x: 20, y: 38 }],
+      [{ x: 63, y: 14 }, { x: 72, y: 14 }, { x: 72, y: 28 }, { x: 65, y: 38 }, { x: 63, y: 28 }],
+      [{ x: 38, y: 38 }, { x: 48, y: 40 }, { x: 48, y: 52 }, { x: 40, y: 52 }, { x: 38, y: 45 }]
     ]
   };
 
@@ -510,22 +535,58 @@
     title: "Convocatoria",
     subtitle: "Primavera del 67",
     quote: 4,
-    objective: { type: "convocatoria", target: 12, timeLimit: 95 },
-    cops: 3,
+    objective: { type: "convocatoria", target: 18, timeLimit: 185 },
+    cops: 5,
     copSpeed: 55,
     chaseBonus: 34,
     detection: 82,
-    allies: 5,
-    maxAllies: 7,
-    powerups: ["press", "beatles", "poncho", "flyer", "mate", "fanzine"],
+    allies: 6,
+    maxAllies: 9,
+    powerups: ["press", "beatles", "poncho", "flyer", "mate", "fanzine", "sombrero"],
     safeSeconds: 6,
     patrols: [
-      [{ x: 4, y: 4 }, { x: 21, y: 4 }, { x: 21, y: 15 }, { x: 4, y: 15 }],
-      [{ x: 37, y: 8 }, { x: 31, y: 16 }, { x: 23, y: 23 }, { x: 37, y: 24 }],
-      [{ x: 6, y: 27 }, { x: 13, y: 23 }, { x: 21, y: 23 }, { x: 31, y: 27 }],
-      [{ x: 58, y: 15 }, { x: 64, y: 23 }, { x: 72, y: 30 }, { x: 63, y: 38 }]
+      [{ x: 31, y: 8 }, { x: 38, y: 8 }, { x: 47, y: 10 }, { x: 47, y: 23 }, { x: 38, y: 23 }, { x: 31, y: 14 }],
+      [{ x: 31, y: 23 }, { x: 38, y: 23 }, { x: 47, y: 25 }, { x: 47, y: 34 }, { x: 38, y: 34 }, { x: 31, y: 34 }],
+      [{ x: 8, y: 45 }, { x: 14, y: 47 }, { x: 22, y: 45 }, { x: 28, y: 47 }, { x: 31, y: 40 }, { x: 20, y: 38 }],
+      [{ x: 58, y: 43 }, { x: 70, y: 43 }, { x: 72, y: 51 }, { x: 64, y: 51 }, { x: 56, y: 45 }],
+      [{ x: 58, y: 14 }, { x: 72, y: 14 }, { x: 72, y: 28 }, { x: 64, y: 28 }, { x: 63, y: 16 }]
     ]
   };
+
+  const CONVOCATORIA_STEPS = [
+    {
+      label: "Florida",
+      x: 690,
+      y: 164,
+      target: 5,
+      hold: 4,
+      text: "La vidriera joven necesita cuerpo en la calle."
+    },
+    {
+      label: "Di Tella",
+      x: 936,
+      y: 164,
+      target: 9,
+      hold: 6,
+      text: "La vanguardia prende cuando la ronda llega junta."
+    },
+    {
+      label: "La Paz",
+      x: 718,
+      y: 510,
+      target: 13,
+      hold: 7,
+      text: "El cafe sostiene la red, pero la vigilancia sube."
+    },
+    {
+      label: "Plaza Francia",
+      x: 300,
+      y: 930,
+      target: 18,
+      hold: 9,
+      text: "La plaza abierta vuelve multitud lo que estaba disperso."
+    }
+  ];
 
   const PATH_RECTS = [
     { x0: 0, x1: 79, y0: 8, y1: 10 },
@@ -563,45 +624,47 @@
   const ROUND_INTERLUDES = [
     // After round 0 (1966 → Bastones Largos)
     [
-      { label: "JULIO 1966",  caption: "El decreto cae: la noche del bastón largo.", scene: "patrol" },
-      { label: "LA PLAZA",    caption: "Los pelos largos se dispersan — pero vuelven.", scene: "crowd" }
+      { label: "29 JULIO 1966", caption: "La universidad intervenida muestra los dientes del régimen.", scene: "file" },
+      { label: "BASTONES LARGOS", caption: "La ciudad aprende una regla nueva: circular distinto alcanza para caer.", scene: "patrol" },
+      { label: "VOLVER A LA PLAZA", caption: "Los dispersos se buscan de nuevo entre kioscos, discos y veredas.", scene: "crowd" }
     ],
     // After round 1 (Bastones Largos → 1969)
     [
-      { label: "1969",             caption: "El Cordobazo tiembla en el aire porteño.", scene: "walk" },
-      { label: "PRESIÓN MÁXIMA",   caption: "Cuatro patrulleros, una plaza, el tiempo se acaba.", scene: "stamp" }
+      { label: "1969", caption: "La sospecha se endurece: pelo, ropa y música entran al parte policial.", scene: "walk" },
+      { label: "CONEXIÓN", caption: "La droga pesa más como mito policial que como práctica masiva.", scene: "florida" },
+      { label: "PRESIÓN MÁXIMA", caption: "Cuatro patrulleros, una plaza, el tiempo se acaba.", scene: "stamp" }
     ]
   ];
 
   const INTRO_STORY = [
     {
       label: "EXPEDIENTE 1966",
-      caption: "Una ficha se abre: pelo largo, plaza, sospecha.",
+      caption: "La juventud deja de ser edad: empieza a verse como identidad peligrosa.",
       scene: "file"
     },
     {
       label: "FLORIDA / DI TELLA",
-      caption: "La ciudad pop prende vidrieras, discos y revistas.",
+      caption: "Revistas, pop, boutiques y discos dibujan una ciudad joven.",
       scene: "florida"
     },
     {
       label: "PLAZA SAN MARTIN",
-      caption: "Un hippie cruza la plaza buscando otros pelos largos.",
+      caption: "Si aparecía otro pelo largo, se lo llamaba a la plaza.",
       scene: "walk"
     },
     {
       label: "RAZZIA",
-      caption: "El patrullero aparece: la mirada policial cierra el cuadro.",
+      caption: "El orden moral convierte ropa, pelo y música en sospecha.",
       scene: "patrol"
     },
     {
-      label: "CONVOCATORIA",
-      caption: "La persecucion, sin quererlo, junta a los dispersos.",
+      label: "IDENTIDAD COLECTIVA",
+      caption: "La persecución junta a quienes estaban dispersos.",
       scene: "crowd"
     },
     {
       label: "LA RAZZIA",
-      caption: "Corre, reuni, aguanta.",
+      caption: "Reuní, corré, aguantá: que el archivo no cierre.",
       scene: "stamp"
     }
   ];
@@ -610,6 +673,16 @@
     playerSpawn: { x: 7, y: 15 },
     safeZone: { x: 24, y: 158, w: 92, h: 58 },
     dangerZone: { x: 438, y: 0, w: 102, h: 104 },
+    districtAreas: [
+      { id: "plaza", label: "Plaza San Martin", short: "Plaza", caption: "verde, kiosco y encuentros", x: 0, y: 0, w: 570, h: 620, labelX: 118, labelY: 420, tint: "rgba(75,143,117,0.10)", mini: "rgba(75,143,117,0.50)", pathStyle: "park", icon: "plaza" },
+      { id: "florida", label: "Florida / Di Tella", short: "Florida", caption: "vidrieras pop y vanguardia", x: 560, y: 0, w: 520, h: 270, labelX: 744, labelY: 82, tint: "rgba(217,79,138,0.09)", mini: "rgba(217,79,138,0.48)", pathStyle: "urban", icon: "pop", plaque: false },
+      { id: "corrientes", label: "Corrientes / La Paz", short: "Corrientes", caption: "cafe, revista y tertulia", x: 610, y: 350, w: 360, h: 260, labelX: 654, labelY: 382, tint: "rgba(232,160,48,0.08)", mini: "rgba(232,160,48,0.48)", pathStyle: "cafe", icon: "coffee" },
+      { id: "cueva", label: "La Cueva / Costanera", short: "Cueva", caption: "rock, sotano y fuga", x: 930, y: 360, w: 300, h: 390, labelX: 1148, labelY: 530, tint: "rgba(107,63,160,0.09)", mini: "rgba(107,63,160,0.50)", pathStyle: "night", icon: "record" },
+      { id: "editorial", label: "Editorial / Protesta", short: "Editorial", caption: "libros, afiches y protesta", x: 1220, y: 120, w: 360, h: 580, labelX: 1508, labelY: 300, tint: "rgba(198,69,50,0.08)", mini: "rgba(198,69,50,0.48)", pathStyle: "protest", icon: "poster", plaque: false },
+      { id: "once", label: "Once / La Perla", short: "Once", caption: "cafe y rock inicial", x: 1110, y: 760, w: 250, h: 220, labelX: 1128, labelY: 806, tint: "rgba(111,94,122,0.10)", mini: "rgba(111,94,122,0.52)", pathStyle: "cafe", icon: "coffee" },
+      { id: "francia", label: "Plaza Francia", short: "Francia", caption: "feria, fogon y ronda", x: 0, y: 620, w: 540, h: 420, labelX: 246, labelY: 842, tint: "rgba(126,227,58,0.07)", mini: "rgba(126,227,58,0.44)", pathStyle: "fair", icon: "guitar" },
+      { id: "gesell", label: "Gesell / Fogon", short: "Gesell", caption: "arena, ruta y fogon", x: 1240, y: 830, w: 330, h: 230, labelX: 1450, labelY: 1010, tint: "rgba(242,197,107,0.10)", mini: "rgba(242,197,107,0.50)", pathStyle: "sand", icon: "beach" }
+    ],
     trees: [
       { x: 2, y: 2 }, { x: 8, y: 2 }, { x: 17, y: 2 },
       { x: 2, y: 16 }, { x: 9, y: 17 }, { x: 18, y: 16 },
@@ -666,23 +739,20 @@
       { x: 25, y: 3 }, { x: 26, y: 3 }
     ],
     signs: [
-      { x: 132, y: 36, text: "Di Tella" },
-      { x: 322, y: 330, text: "Boite Florida" },
-      { x: 620, y: 178, text: "Florida" },
-      { x: 245, y: 540, text: "Plaza" },
-      { x: 902, y: 126, text: "Di Tella" },
-      { x: 970, y: 430, text: "La Cueva" },
-      { x: 470, y: 704, text: "Mandioca" },
-      { x: 1028, y: 684, text: "Costanera" },
-      { x: 682, y: 136, text: "Galeria" },
-      { x: 718, y: 510, text: "La Paz" },
-      { x: 1110, y: 606, text: "Gesell" },
-      { x: 1260, y: 292, text: "Galeria Este" },
-      { x: 1374, y: 172, text: "J. Alvarez" },
-      { x: 1210, y: 850, text: "La Perla" },
-      { x: 300, y: 930, text: "Plaza Francia" },
-      { x: 1460, y: 520, text: "Tucuman Arde" },
-      { x: 1322, y: 922, text: "Fogon Gesell" }
+      { x: 330, y: 350, text: "Boite Florida", short: "Boite", mount: "ground" },
+      { x: 245, y: 540, text: "Plaza", mount: "ground" },
+      { x: 934, y: 114, text: "Di Tella", mount: "wall" },
+      { x: 1020, y: 392, text: "La Cueva", mount: "wall" },
+      { x: 500, y: 724, text: "Mandioca", mount: "wall" },
+      { x: 1040, y: 626, text: "Costanera", mount: "wall" },
+      { x: 696, y: 96, text: "Galeria", mount: "wall" },
+      { x: 724, y: 420, text: "La Paz", mount: "wall" },
+      { x: 1110, y: 606, text: "Gesell", mount: "wall" },
+      { x: 1284, y: 282, text: "Galeria Este", short: "Galeria E.", mount: "wall" },
+      { x: 1424, y: 172, text: "J. Alvarez", mount: "wall" },
+      { x: 1210, y: 824, text: "La Perla", mount: "wall" },
+      { x: 1460, y: 500, text: "Tucuman Arde", short: "Tucuman", mount: "wall" },
+      { x: 1360, y: 994, text: "Fogon Gesell", short: "Fogon", mount: "ground" }
     ],
     lamps: [
       { x: 196, y: 145 }, { x: 330, y: 150 }, { x: 432, y: 312 },
@@ -696,7 +766,7 @@
     posters: [
       { x: 456, y: 38, text: "NO", color: "danger" },
       { x: 666, y: 118, text: "POP", color: "posterPink" },
-      { x: 708, y: 466, text: "BEAT", color: "posterBlue" },
+      { x: 674, y: 474, text: "BEAT", color: "posterBlue" },
       { x: 614, y: 196, text: "PP", color: "gold" },
       { x: 252, y: 518, text: "PAZ", color: "leafLight" },
       { x: 910, y: 178, text: "ITDT", color: "posterBlue" },
@@ -705,7 +775,7 @@
       { x: 1042, y: 718, text: "SOL", color: "gold" },
       { x: 738, y: 448, text: "BLOW", color: "posterBlue" },
       { x: 556, y: 82, text: "MOD", color: "gold" },
-      { x: 204, y: 654, text: "LIB", color: "posterPurple" },
+      { x: 1412, y: 226, text: "LIB", color: "posterPurple" },
       { x: 1286, y: 332, text: "G.E.", color: "posterPink" },
       { x: 1380, y: 206, text: "JA", color: "gold" },
       { x: 1214, y: 880, text: "ONCE", color: "posterPurple" },
@@ -724,7 +794,10 @@
       { x: 1240, y: 302, tint: "paper" }, { x: 1388, y: 188, tint: "gold" },
       { x: 1186, y: 874, tint: "paper" }, { x: 1472, y: 532, tint: "paper" },
       { x: 318, y: 940, tint: "gold" }, { x: 1328, y: 902, tint: "paper" },
-      { x: 728, y: 956, tint: "paper" }, { x: 1510, y: 720, tint: "gold" }
+      { x: 728, y: 956, tint: "paper" }, { x: 1510, y: 720, tint: "gold" },
+      { x: 92, y: 742, tint: "paper" }, { x: 188, y: 840, tint: "gold" },
+      { x: 426, y: 896, tint: "paper" }, { x: 650, y: 918, tint: "paper" },
+      { x: 808, y: 1018, tint: "gold" }, { x: 1048, y: 944, tint: "paper" }
     ],
     flowerBeds: [
       { x: 72, y: 70, w: 40, h: 14 },
@@ -740,7 +813,13 @@
       { x: 1170, y: 820, w: 78, h: 14 },
       { x: 280, y: 900, w: 86, h: 14 },
       { x: 1320, y: 992, w: 88, h: 14 },
-      { x: 1480, y: 650, w: 68, h: 12 }
+      { x: 1480, y: 650, w: 68, h: 12 },
+      { x: 76, y: 790, w: 64, h: 12 },
+      { x: 184, y: 838, w: 54, h: 12 },
+      { x: 420, y: 846, w: 64, h: 12 },
+      { x: 640, y: 934, w: 58, h: 12 },
+      { x: 790, y: 1010, w: 72, h: 12 },
+      { x: 1034, y: 910, w: 68, h: 12 }
     ],
     props: [
       { x: 690, y: 122, kind: "boutique" },
@@ -755,8 +834,16 @@
       { x: 1382, y: 196, kind: "books" },
       { x: 1210, y: 872, kind: "coffee" },
       { x: 310, y: 940, kind: "guitar" },
+      { x: 338, y: 934, kind: "fire" },
       { x: 1340, y: 938, kind: "beach" },
-      { x: 1468, y: 540, kind: "camera" }
+      { x: 1324, y: 918, kind: "fire" },
+      { x: 1468, y: 540, kind: "camera" },
+      { x: 118, y: 700, kind: "guitar" },
+      { x: 214, y: 828, kind: "books" },
+      { x: 472, y: 884, kind: "coffee" },
+      { x: 690, y: 946, kind: "books" },
+      { x: 820, y: 1018, kind: "camera" },
+      { x: 1070, y: 918, kind: "coffee" }
     ],
     easterEggs: [
       {
@@ -798,7 +885,8 @@
         text: "Un sotano imaginario guarda canciones, humo, fuga y complicidad.",
         bonus: 25,
         kind: "door",
-        summon: 1
+        summon: 1,
+        refuge: true
       },
       {
         id: "mandioca",
@@ -849,7 +937,20 @@
         text: "Plazas, rutas y bordes de ciudad arman otra cartografia joven.",
         bonus: 25,
         kind: "bench",
-        summon: 1
+        summon: 1,
+        refuge: true
+      },
+      {
+        id: "la-paz",
+        x: 718,
+        y: 510,
+        label: "Bar La Paz",
+        section: "Plaza",
+        text: "El cafe sostiene la red: en La Paz se encontraban los que no tenian otro lugar.",
+        bonus: 25,
+        kind: "door",
+        refuge: true,
+        refugeLabel: "below"
       },
       {
         id: "galerias-florida",
@@ -883,8 +984,8 @@
       },
       {
         id: "cafe-la-paz",
-        x: 722,
-        y: 502,
+        x: 760,
+        y: 488,
         label: "Café La Paz",
         section: "Corrientes",
         text: "Un cafe podia ser refugio, redaccion, tertulia y punto de fuga.",
@@ -1304,13 +1405,15 @@
         "NNNNNNNN"
       ],
       sombrero: [
-        "....OO..",
-        "...OOOO.",
-        "..OOOOOO",
-        "OOOOOOOO",
-        ".OOOOOO.",
-        "..OOOO..",
-        "...BB..."
+        "..BBBBB..",
+        ".BOOOOOB.",
+        "BBBBBBBBB",
+        "...B.B...",
+        "..BBBBB..",
+        "..BCCCB..",
+        ".BCCBCCB.",
+        ".BCCCCCB.",
+        "..B...B.."
       ]
     },
     ui: {
@@ -1407,6 +1510,8 @@
     collectedRound: 0,
     hippiesTotal: 0,
     crowdCount: 0,
+    convocatoriaStep: 0,
+    checkpointHold: 0,
     safeZoneTimer: 0,
     activePowerUp: null,
     player: null,
@@ -1439,6 +1544,18 @@
     musicTimer: 0,
     musicPulse: 0,
     musicSummonTimer: 0,
+    disguised: false,
+    disguiseReady: false,
+    infiltradoWarned: false,
+    infiltradoTellShown: false,
+    refugeHintShown: false,
+    policeSearchHintShown: false,
+    razziaZone: null,
+    refugeTimer: 0,
+    refugeHoldTimer: 0,
+    currentRefuge: null,
+    currentDistrictId: "",
+    seenDistricts: new Set(),
     highScores: loadScores(),
     saved: false
   };
@@ -1452,6 +1569,7 @@
   let rafId = null;
   let lastTime = 0;
   let introActive = false;
+  let interludeActive = false;
 
   function rebuildBlockedTiles() {
     blockedTiles = new Set();
@@ -1483,6 +1601,8 @@
     game.lastScoreSecond = 0;
     game.hippiesTotal = 0;
     game.crowdCount = 0;
+    game.convocatoriaStep = 0;
+    game.checkpointHold = 0;
     game.crowd = [];
     game.quoteDeck = [];
     game.lastQuoteText = "";
@@ -1494,6 +1614,18 @@
     game.musicSummonTimer = 0;
     game.highScores = loadScores(runMode);
     game.saved = false;
+    game.disguised = false;
+    game.disguiseReady = false;
+    game.infiltradoWarned = false;
+    game.infiltradoTellShown = false;
+    game.refugeHintShown = false;
+    game.policeSearchHintShown = false;
+    game.razziaZone = null;
+    game.refugeTimer = 0;
+    game.refugeHoldTimer = 0;
+    game.currentRefuge = null;
+    game.currentDistrictId = "";
+    game.seenDistricts = new Set();
     if (runMode === "survival") {
       setupSurvival();
     } else if (runMode === "convocatoria") {
@@ -1539,6 +1671,7 @@
     game.musicTimer = 0;
     game.musicPulse = 0;
     game.musicSummonTimer = 0;
+    game.checkpointHold = 0;
     const district = game.runMode === "story" && cfg.district ? DISTRICTS[cfg.district] : null;
     game.player = {
       x: spawn.x,
@@ -1546,7 +1679,7 @@
       path: [],
       dir: 1,
       walk: 0,
-      hairLevel: Math.min(3, 3 - game.lives)
+      hairLevel: playerHairLevel()
     };
     game.cops = createCops(cfg);
     game.allies = [];
@@ -1555,7 +1688,6 @@
     game.powerUps = [];
     game.particles = [];
     game.floaters = [];
-    game.discoveredEggs = new Set();
     game.archive = loadArchive();
     // Camera focuses on the district's area, but player always starts at the safe default spawn
     if (district) {
@@ -1570,6 +1702,7 @@
     spawnPowerUp();
     hideOverlay();
     updatePauseButton();
+    updateDisguiseButton();
     showMsg(objectiveText(cfg));
     updateHud();
     draw();
@@ -1577,9 +1710,20 @@
   }
 
   function createCops(cfg) {
-    return cfg.patrols.slice(0, cfg.cops).map((route, index) => {
-      return createCop(route, index);
-    });
+    const routes = cfg.patrols && cfg.patrols.length ? cfg.patrols : SURVIVAL_CONFIG.patrols;
+    const cops = [];
+    for (let index = 0; index < cfg.cops; index++) {
+      cops.push(createCop(routes[index % routes.length], index));
+    }
+    return cops;
+  }
+
+  function playerMaxLives() {
+    return (ARCHETYPES[game.archetype] || ARCHETYPES.estudiante).lives;
+  }
+
+  function playerHairLevel() {
+    return clamp(playerMaxLives() - game.lives, 0, 3);
   }
 
   function createCop(route, index) {
@@ -1592,12 +1736,18 @@
       path: [],
       goalKey: "",
       wait: index * 0.18,
+      state: "patrol",
       alert: false,
       alertTimer: 0,
+      searchTimer: 0,
+      lastKnown: null,
+      searchQueue: [],
+      searchIndex: 0,
+      role: "patrol",
+      roleTimer: 0,
       repathTimer: 0,
       walk: 0,
       facing: directionFromRoute(route),
-      flanker: index === 0,
       id: index
     };
   }
@@ -1607,6 +1757,40 @@
     const a = tileCenter(route[0].x, route[0].y);
     const b = tileCenter(route[1].x, route[1].y);
     return normalizeVector(b.x - a.x, b.y - a.y);
+  }
+
+  function pickLeastCrowdedRoute(routes, options = {}) {
+    if (!routes || !routes.length) return [];
+    let best = routes[0];
+    let bestScore = Infinity;
+    for (const route of routes) {
+      const key = routeSignature(route);
+      const usage = game.cops.filter((cop) => routeSignature(cop.route) === key).length;
+      const center = routeCenter(route);
+      const playerDistance = game.player ? dist(center, game.player) : 0;
+      const farBonus = options.preferFar ? playerDistance * 0.04 : 0;
+      const score = usage * 100 - farBonus + route.length * 0.01;
+      if (score < bestScore) {
+        best = route;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  function routeSignature(route) {
+    return (route || []).map((tile) => tileKey(tile.x, tile.y)).join("|");
+  }
+
+  function routeCenter(route) {
+    if (!route || !route.length) return { x: 0, y: 0 };
+    const sum = route.reduce((acc, tile) => {
+      const pt = tileCenter(tile.x, tile.y);
+      acc.x += pt.x;
+      acc.y += pt.y;
+      return acc;
+    }, { x: 0, y: 0 });
+    return { x: sum.x / route.length, y: sum.y / route.length };
   }
 
   function startLoop() {
@@ -1680,6 +1864,20 @@
     pauseButton.setAttribute("aria-label", game.mode === "paused" ? "Reanudar juego" : "Pausar juego");
   }
 
+  function updateDisguiseButton() {
+    if (!disguiseButton) return;
+    const active = Boolean(game.disguised);
+    const ready = active || game.disguiseReady;
+    disguiseButton.disabled = !ready || game.mode !== "playing";
+    disguiseButton.classList.toggle("is-active", active);
+    disguiseButton.classList.toggle("is-disabled", !ready);
+    disguiseButton.textContent = active ? "Salir" : game.disguiseReady ? "Disfraz" : "Sin disf.";
+    disguiseButton.setAttribute(
+      "aria-label",
+      active ? "Salir del disfraz" : game.disguiseReady ? "Activar disfraz" : "Buscar un disfraz"
+    );
+  }
+
   function update(dt) {
     SFX.tickDown(dt);
     const cfg = currentConfig();
@@ -1694,6 +1892,9 @@
     if (game.caughtCooldown > 0) game.caughtCooldown -= dt;
     if (game.msgTimer > 0) game.msgTimer -= dt;
     updatePowerUp(dt);
+    updateDisguise(dt);
+    updateRazziaZone(dt);
+    updateRefuge(dt);
     updatePlayer(dt);
     updateCrowd(dt);
     updateCops(dt, cfg);
@@ -1702,11 +1903,14 @@
     updateMusic(dt);
     updatePowerUps(dt, cfg);
     updateEasterEggs();
+    updateConvocatoriaObjective(dt);
     updateParticles(dt);
     updateFloaters(dt);
     checkTimedObjective(cfg);
     updateCamera();
+    updateDistrictHint();
     updateHud();
+    updateDisguiseButton();
   }
 
   function currentConfig() {
@@ -1763,11 +1967,23 @@
     return "Rumor";
   }
 
+  function updateDistrictHint() {
+    if (!game.player || game.mode !== "playing") return;
+    const district = districtAt(game.player.x, game.player.y);
+    const id = district ? district.id : "";
+    if (game.currentDistrictId === id) return;
+    game.currentDistrictId = id;
+    if (!district || game.totalTime < 1.4 || game.seenDistricts.has(id)) return;
+    if (game.msgTimer > 1.2) return;
+    game.seenDistricts.add(id);
+    showMsg(`${district.label}: ${district.caption}.`, 3.8, "event");
+  }
+
   function updateSurvivalPressure() {
     if (game.runMode !== "survival" || game.roundTimer < game.nextReinforcement) return;
     game.survivalLevel += 1;
     game.nextReinforcement += 30;
-    const route = SURVIVAL_CONFIG.patrols[game.survivalLevel % SURVIVAL_CONFIG.patrols.length];
+    const route = pickLeastCrowdedRoute(SURVIVAL_CONFIG.patrols, { preferFar: true });
     game.cops.push(createCop(route, game.cops.length));
     showMsg(`Refuerzos policiales. Presión ${game.survivalLevel + 1}.`);
   }
@@ -1849,10 +2065,40 @@
       return;
     }
 
+    if (event.type === "zona_razzia") {
+      if (game.razziaZone) return;
+      const cops = game.cops.filter(c => c.state !== "chase");
+      const anchor = cops.length ? randomFrom(cops) : game.player;
+      const zw = 140 + Math.random() * 60;
+      const zh = 120 + Math.random() * 50;
+      game.razziaZone = {
+        x: clamp(anchor.x - zw / 2, 0, WORLD_W - zw),
+        y: clamp(anchor.y - zh / 2, 0, WORLD_H - zh),
+        w: zw,
+        h: zh,
+        timer: 13,
+        duration: 13,
+        warnShown: false,
+        enteredWarnShown: false
+      };
+      showMsg("La razzia cierra la cuadra. Salí antes de que sea tarde.", 5.2, "event");
+      return;
+    }
+
     if (event.type === "razzia") {
       const extras = game.runMode === "survival" || game.runMode === "convocatoria" ? 2 : 1;
       for (let i = 0; i < extras; i++) spawnTemporaryCop();
-      showMsg("Razzia sorpresa: salen refuerzos desde la comisaría.", 4.8, "event");
+      if (game.round >= 1 && Math.random() < 0.35) {
+        spawnNpc("infiltrado", 1);
+        if (!game.infiltradoWarned) {
+          game.infiltradoWarned = true;
+          showMsg("Hay un pelo largo que no es de los nuestros. Cuidado.", 5.2, "event");
+        } else {
+          showMsg("Razzia sorpresa: salen refuerzos desde la comisaría.", 4.8, "event");
+        }
+      } else {
+        showMsg("Razzia sorpresa: salen refuerzos desde la comisaría.", 4.8, "event");
+      }
     }
   }
 
@@ -1868,9 +2114,108 @@
     if (!game.activePowerUp) return;
     game.activePowerUp.timer -= dt;
     if (game.activePowerUp.timer <= 0) {
-      showMsg(`${POWERUPS[game.activePowerUp.type].label} se agota.`);
+      const type = game.activePowerUp.type;
+      if (type === "sombrero") {
+        game.disguised = false;
+        showMsg("El disfraz se cae. La cana te puede reconocer de nuevo.", 2.9, "event");
+      } else {
+        showMsg(`${POWERUPS[type].label} se agota.`);
+      }
       game.activePowerUp = null;
     }
+  }
+
+  function updateRefuge(dt) {
+    if (!game.player || game.mode !== "playing") return;
+
+    if (game.refugeTimer > 0) {
+      game.refugeTimer -= dt;
+      if (game.refugeTimer <= 0) {
+        game.refugeTimer = 0;
+        game.currentRefuge = null;
+        showMsg("Tuviste que salir. La cana te puede ver de nuevo.", 3.2, "event");
+      }
+      return;
+    }
+
+    const nearbyRefuge = MAP.easterEggs.find(e => e.refuge && dist(e, game.player) < 82);
+    if (nearbyRefuge && !game.refugeHintShown) {
+      game.refugeHintShown = true;
+      showMsg("Refugio: quedate cerca 2s para esconderte unos segundos.", 4.6, "event");
+    }
+
+    const refugeEgg = nearbyRefuge && dist(nearbyRefuge, game.player) < 30 ? nearbyRefuge : null;
+    if (refugeEgg) {
+      game.refugeHoldTimer += dt;
+      game.currentRefuge = refugeEgg;
+      if (game.refugeHoldTimer >= 2) {
+        game.refugeHoldTimer = 0;
+        game.refugeTimer = 8;
+        if (!isEggKnown(refugeEgg)) discoverEasterEgg(refugeEgg);
+        SFX.powerUp();
+        showMsg(`Entrás a ${refugeEgg.label}. La cana no entra. Tenés 8 segundos.`, 5.5, "power");
+      }
+    } else {
+      game.refugeHoldTimer = Math.max(0, game.refugeHoldTimer - dt * 2);
+      if (game.refugeHoldTimer <= 0) game.currentRefuge = null;
+    }
+  }
+
+  function updateRazziaZone(dt) {
+    const z = game.razziaZone;
+    if (!z || game.mode !== "playing") return;
+    const inside = game.player && isInsideRect(game.player, z);
+    if (inside && !z.enteredWarnShown) {
+      z.enteredWarnShown = true;
+      showMsg("Estás dentro de la zona cerrada: salí ya.", 3.6, "event");
+    }
+    z.timer -= dt;
+    if (z.timer <= 3 && !z.warnShown) {
+      z.warnShown = true;
+      showMsg("¡La zona se cierra ahora!", 2.2, "event");
+      SFX.alert(true);
+    }
+    if (z.timer <= 0) {
+      if (inside) {
+        catchPlayer();
+      }
+      game.razziaZone = null;
+    }
+  }
+
+  function isInsideRect(point, rect) {
+    return point.x >= rect.x && point.x <= rect.x + rect.w &&
+           point.y >= rect.y && point.y <= rect.y + rect.h;
+  }
+
+  function updateDisguise(dt) {
+    if (!game.player || game.mode !== "playing") return;
+    if (game.disguised && !activePower("sombrero")) game.disguised = false;
+  }
+
+  function toggleDisguise() {
+    if (game.mode !== "playing") return;
+    if (game.disguised) {
+      game.disguised = false;
+      if (activePower("sombrero")) game.activePowerUp = null;
+      showMsg("Te sacás el disfraz. Ya no sirve para otra vez.", 2.8, "event");
+      updateDisguiseButton();
+      return;
+    }
+    if (!game.disguiseReady) {
+      showMsg("Necesitás encontrar un disfraz antes de activarlo.", 2.8, "event");
+      updateDisguiseButton();
+      return;
+    }
+    const power = POWERUPS.sombrero;
+    game.disguiseReady = false;
+    game.disguised = true;
+    game.activePowerUp = { type: "sombrero", timer: power.duration };
+    SFX.powerUp();
+    burst(game.player.x, game.player.y, power.color, 18);
+    floatText("Disfraz", game.player.x, game.player.y - 24, power.color);
+    showMsg("Te mezclás entre oficinistas. La cana duda, pero los aliados tampoco te reconocen.", 4.2, "power");
+    updateDisguiseButton();
   }
 
   function updatePlayer(dt) {
@@ -1999,37 +2344,62 @@
     const protectedByKiosk = isPlayerProtected();
     const inDanger = rectContains(MAP.dangerZone, game.player);
     game.cops = game.cops.filter((cop) => cop.tempTimer == null || cop.tempTimer > 0);
+    const detect = detectionRadius(cfg, inDanger);
+    let spotter = null;
+    let spotterScore = Infinity;
 
     for (const cop of game.cops) {
       if (cop.tempTimer != null) cop.tempTimer -= dt;
+      if (cop.roleTimer > 0) cop.roleTimer = Math.max(0, cop.roleTimer - dt);
       if (frozen) {
-        cop.alert = false;
+        clearCopAlert(cop);
         cop.walk += dt * 2;
         continue;
       }
 
-      if (confused && !inDanger) {
-        cop.alert = false;
-        cop.alertTimer = 0;
-      }
-
-      const detect = detectionRadius(cfg, inDanger);
       const seesPlayer = !protectedByKiosk && game.caughtCooldown <= 0 && !activePower("sombrero") && copSeesPlayer(cop, detect);
+      cop.seesPlayer = seesPlayer;
       if (seesPlayer || inDanger) {
-        if (!cop.alert && seesPlayer) SFX.alert();
-        cop.alert = true;
-        cop.alertTimer = inDanger ? 1.35 : (confused ? 0.45 : 1.8);
-      } else if (cop.alertTimer > 0) {
-        cop.alertTimer -= dt;
+        const score = dist(cop, game.player) + (seesPlayer ? 0 : 220);
+        if (score < spotterScore) {
+          spotter = cop;
+          spotterScore = score;
+        }
+      }
+    }
+
+    if (!frozen && spotter) {
+      const lastKnown = currentTile(game.player);
+      if (confused && !inDanger) {
+        startCopSearch(spotter, 0.9, lastKnown, "search");
       } else {
-        cop.alert = false;
+        assignPoliceRoles(spotter, lastKnown, inDanger);
+      }
+    }
+
+    for (const cop of game.cops) {
+      if (frozen) continue;
+      if (cop.seesPlayer && cop.state === "chase") {
+        cop.alertTimer = inDanger ? 1.35 : 1.55;
+        cop.lastKnown = currentTile(game.player);
+      } else if (cop.state === "chase") {
+        cop.alertTimer -= dt;
+        if (cop.alertTimer <= 0) {
+          startCopSearch(cop, copSearchDuration(confused), cop.lastKnown || currentTile(game.player), "search");
+        }
+      } else if (cop.state === "search") {
+        cop.searchTimer -= dt;
+        if (confused && !inDanger) cop.searchTimer -= dt * 0.65;
+        if (cop.searchTimer <= 0) clearCopAlert(cop);
       }
 
       const baseSpeed = cfg.copSpeed * (confused ? 0.55 : 1);
       const chaseBonus = cfg.chaseBonus * (confused ? 0.2 : 1);
-      const speed = cop.alert && !protectedByKiosk ? baseSpeed + chaseBonus : baseSpeed;
-      if (cop.alert && !protectedByKiosk) {
+      const speed = cop.state === "chase" && !protectedByKiosk ? baseSpeed + chaseBonus : baseSpeed;
+      if (cop.state === "chase" && !protectedByKiosk) {
         moveCopToTile(cop, copChaseTarget(cop), speed, dt, true);
+      } else if (cop.state === "search") {
+        updateCopSearch(cop, baseSpeed * (cop.role === "flank" ? 0.9 : 0.78), dt);
       } else {
         updateCopPatrol(cop, speed, dt);
       }
@@ -2049,31 +2419,199 @@
   }
 
   function copChaseTarget(cop) {
-    if (cop.flanker && game.player.path.length > 1) {
-      return game.player.path[game.player.path.length - 1];
+    if (cop.role === "flank" && game.player.path.length > 1) {
+      return game.player.path[Math.min(game.player.path.length - 1, 3)];
     }
     return currentTile(game.player);
   }
 
+  function assignPoliceRoles(spotter, lastKnown, inDanger) {
+    if (!spotter) return;
+    const duration = copSearchDuration(false);
+    if (spotter.state !== "chase") SFX.alert();
+
+    setCopLead(spotter, lastKnown, inDanger);
+
+    const supportRadius = policeSupportRadius(inDanger);
+    const supportLimit = policeSupportLimit(inDanger);
+    const others = game.cops
+      .filter((cop) => cop !== spotter)
+      .map((cop) => ({ cop, d: dist(cop, game.player) }))
+      .filter(({ cop, d }) => inDanger || d <= supportRadius || cop.state === "search")
+      .sort((a, b) => a.d - b.d)
+      .slice(0, supportLimit)
+      .map(({ cop }) => cop);
+
+    others.forEach((cop, index) => {
+      if (cop.state === "search" && cop.roleTimer > 0) {
+        cop.lastKnown = lastKnown;
+        return;
+      }
+      startCopSearch(cop, duration * (index === 0 ? 0.95 : 0.82), lastKnown, index === 0 ? "flank" : "search");
+    });
+  }
+
+  function policeSupportRadius(inDanger) {
+    if (inDanger) return 560;
+    if (game.runMode === "convocatoria") return 430;
+    if (game.runMode === "survival") return 390;
+    return 340;
+  }
+
+  function policeSupportLimit(inDanger) {
+    if (inDanger) return Math.min(3, Math.max(1, game.cops.length - 1));
+    if (game.runMode === "convocatoria") return 2;
+    if (game.runMode === "survival") return 2;
+    return 1;
+  }
+
+  function setCopLead(cop, lastKnown, inDanger) {
+    cop.state = "chase";
+    cop.role = "lead";
+    cop.roleTimer = 1.65;
+    cop.alert = true;
+    cop.alertTimer = inDanger ? 1.35 : 1.55;
+    cop.searchTimer = 0;
+    cop.searchQueue = [];
+    cop.searchIndex = 0;
+    cop.lastKnown = lastKnown;
+  }
+
+  function copSearchDuration(confused = false) {
+    const base = game.runMode === "convocatoria" ? 6 : game.runMode === "survival" ? 5.5 : 4.5;
+    return confused ? base * 0.55 : base;
+  }
+
+  function startCopSearch(cop, duration, lastKnown, role = "search") {
+    if (!cop) return;
+    const known = lastKnown || cop.lastKnown || (game.player ? currentTile(game.player) : currentTile(cop));
+    cop.state = "search";
+    cop.role = role;
+    cop.roleTimer = duration;
+    cop.alert = false;
+    cop.alertTimer = 0;
+    cop.searchTimer = duration;
+    cop.lastKnown = known;
+    cop.searchQueue = role === "flank" ? buildFlankQueue(cop, known) : buildSearchQueue(cop, known);
+    cop.searchIndex = 0;
+    cop.path = [];
+    cop.goalKey = "";
+    if (!game.policeSearchHintShown && game.mode === "playing") {
+      game.policeSearchHintShown = true;
+      showMsg("La cana revisa el último lugar donde te vio.", 3.4, "event");
+    }
+  }
+
+  function clearCopAlert(cop) {
+    cop.state = "patrol";
+    cop.role = "patrol";
+    cop.roleTimer = 0;
+    cop.alert = false;
+    cop.alertTimer = 0;
+    cop.searchTimer = 0;
+    cop.lastKnown = null;
+    cop.searchQueue = [];
+    cop.searchIndex = 0;
+    cop.path = [];
+    cop.goalKey = "";
+  }
+
+  function buildSearchQueue(cop, lastKnown) {
+    const offsets = [
+      { x: 0, y: 0 },
+      { x: 3, y: 0 }, { x: -3, y: 0 },
+      { x: 0, y: 3 }, { x: 0, y: -3 },
+      { x: 2, y: 2 }, { x: -2, y: 2 },
+      { x: 2, y: -2 }, { x: -2, y: -2 }
+    ];
+    const start = cop.id % 4;
+    const ordered = [offsets[0], ...offsets.slice(1 + start), ...offsets.slice(1, 1 + start)];
+    return reachableSearchTiles(cop, lastKnown, ordered, 4);
+  }
+
+  function buildFlankQueue(cop, lastKnown) {
+    const playerGoal = game.player.path.length > 1
+      ? game.player.path[Math.min(game.player.path.length - 1, 3)]
+      : null;
+    const side = cop.id % 2 ? -1 : 1;
+    const flankBase = playerGoal || { x: lastKnown.x + side * 3, y: lastKnown.y + 2 };
+    const offsets = [
+      { x: 0, y: 0 },
+      { x: side * 2, y: 0 },
+      { x: 0, y: 2 },
+      { x: -side * 2, y: 1 },
+      { x: 0, y: -2 }
+    ];
+    const queue = reachableSearchTiles(cop, flankBase, offsets, 2);
+    return queue.length ? [...queue, ...buildSearchQueue(cop, lastKnown).slice(0, 2)] : buildSearchQueue(cop, lastKnown);
+  }
+
+  function reachableSearchTiles(cop, base, offsets, limit) {
+    const start = currentTile(cop);
+    const seen = new Set();
+    const tiles = [];
+    for (const offset of offsets) {
+      const tile = nearestOpenTile({ x: base.x + offset.x, y: base.y + offset.y });
+      if (!tile) continue;
+      const key = tileKey(tile.x, tile.y);
+      if (seen.has(key)) continue;
+      const path = bfs(start.x, start.y, tile.x, tile.y);
+      if (!path) continue;
+      seen.add(key);
+      tiles.push(tile);
+      if (tiles.length >= limit) break;
+    }
+    return tiles;
+  }
+
+  function updateCopSearch(cop, speed, dt) {
+    if (!cop.searchQueue.length) {
+      clearCopAlert(cop);
+      return;
+    }
+    if (cop.wait > 0) {
+      cop.wait = Math.max(0, cop.wait - dt);
+      cop.walk += dt * 2;
+      return;
+    }
+    const targetTile = cop.searchQueue[cop.searchIndex];
+    if (!targetTile) {
+      clearCopAlert(cop);
+      return;
+    }
+    const target = tileCenter(targetTile.x, targetTile.y);
+    if (dist(cop, target) <= 7) {
+      cop.searchIndex += 1;
+      cop.path = [];
+      cop.goalKey = "";
+      cop.wait = 0.2;
+      if (cop.searchIndex >= cop.searchQueue.length) clearCopAlert(cop);
+      return;
+    }
+    moveCopToTile(cop, targetTile, speed, dt, false);
+  }
+
   function propagateCopAlerts() {
     const RADIO = 180;
-    const alerters = game.cops.filter(c => c.alert);
+    const alerters = game.cops.filter(c => c.state === "chase");
     if (!alerters.length) return;
     for (const cop of game.cops) {
-      if (cop.alert) continue;
-      if (alerters.some(a => dist(cop, a) < RADIO)) {
-        cop.alert = true;
-        cop.alertTimer = 1.15;
+      if (cop.state === "chase" || cop.state === "search") continue;
+      const alerter = alerters.find(a => dist(cop, a) < RADIO);
+      if (alerter) {
+        startCopSearch(cop, copSearchDuration(false) * 0.55, alerter.lastKnown || currentTile(alerter), "search");
       }
     }
   }
 
   function detectionRadius(cfg, includeDanger = false) {
+    if (game.disguised || game.refugeTimer > 0) return 0;
     let radius = cfg.detection;
     if (activePower("poncho")) radius *= 0.55;
     if (activePower("sombrero")) radius *= 0.12;
     if (leafConfusesPolice()) radius *= 0.42;
     if (game.runMode === "convocatoria") radius += Math.min(34, game.crowdCount * 2.2);
+    if (game.runMode === "survival") radius += Math.min(20, game.crowdCount * 1.35);
     radius += notorietyValue() * 0.18;
     if (includeDanger) radius += 34;
     return radius;
@@ -2140,7 +2678,7 @@
       ally.bob += dt * 7;
       ally.walk += dt * 5;
       if (ally.glow > 0) ally.glow = Math.max(0, ally.glow - dt);
-      if (!ally.collected && dist(ally, game.player) < allyCollectRadius()) {
+      if (!ally.collected && !game.disguised && dist(ally, game.player) < allyCollectRadius()) {
         collectAlly(ally);
       }
     }
@@ -2162,6 +2700,11 @@
       npc.walk += dt * 6;
       if (npc.bumpCooldown > 0) npc.bumpCooldown -= dt;
       updateCopPatrol(npc, type.speed, dt);
+
+      if (npc.type === "infiltrado" && !game.infiltradoTellShown && dist(npc, game.player) < 84) {
+        game.infiltradoTellShown = true;
+        showMsg("Algo no cierra: ese supuesto compañero mira demasiado a la cana.", 4.6, "event");
+      }
 
       if (dist(npc, game.player) <= type.radius) {
         interactWithNpc(npc, type);
@@ -2187,6 +2730,15 @@
   }
 
   function interactWithNpc(npc, type) {
+    if (npc.type === "infiltrado") {
+      if (game.caughtCooldown > 0 || game.disguised) return;
+      npc.collected = true;
+      burst(npc.x, npc.y, COLORS.danger, 20);
+      floatText("¡Infiltrado!", npc.x, npc.y - 22, COLORS.danger);
+      catchPlayer();
+      return;
+    }
+
     if (npc.type === "executive") {
       if (npc.bumpCooldown > 0 || game.caughtCooldown > 0) return;
       npc.bumpCooldown = 2.4;
@@ -2264,14 +2816,15 @@
   function updateEasterEggs() {
     if (!game.player) return;
     for (const egg of MAP.easterEggs) {
-      if (game.discoveredEggs.has(egg.id)) continue;
+      if (isEggKnown(egg)) continue;
       if (dist(egg, game.player) > 24) continue;
       discoverEasterEgg(egg);
     }
   }
 
   function discoverEasterEgg(egg) {
-    const prevCount = game.discoveredEggs.size;
+    const prevArchive = loadArchive();
+    const prevCount = archiveCount(prevArchive);
     game.discoveredEggs.add(egg.id);
     game.archive = saveArchiveId(egg.id);
     game.score += egg.bonus;
@@ -2283,7 +2836,7 @@
     }
     const total = MAP.easterEggs.length;
     const prevPct = total ? Math.round((prevCount / total) * 100) : 0;
-    const newPct  = total ? Math.round((game.discoveredEggs.size / total) * 100) : 0;
+    const newPct  = total ? Math.round((archiveCount(game.archive) / total) * 100) : 0;
     const newUnlock = PALETTE_UNLOCKS.find(p => p.threshold > prevPct && p.threshold <= newPct);
     if (newUnlock) {
       showMsg(`Color desbloqueado: ${newUnlock.label}`, 5, "power");
@@ -2315,7 +2868,7 @@
     game.combo += 1;
     game.collectedRound += 1;
     game.hippiesTotal += 1;
-    if (game.runMode === "convocatoria") addCrowdMember(ally);
+    if (followersEnabled()) addCrowdMember(ally);
     SFX.collect();
     burst(ally.x, ally.y, COLORS.particle, 18);
     floatText(game.combo >= 5 ? `+10 x${game.combo}` : "+10", ally.x, ally.y - 20, COLORS.gold);
@@ -2371,6 +2924,11 @@
   function activatePowerUp(type, source = game.player) {
     SFX.powerUp();
     const power = POWERUPS[type];
+    if (type === "sombrero") {
+      collectDisguisePower(source, power);
+      return;
+    }
+    if (game.disguised) game.disguised = false;
     const duration = type === "flyer" && leafModeSummons() ? power.survivalDuration : power.duration;
     game.activePowerUp = { type, timer: duration };
     if (source) floatText(power.short, source.x, source.y - 22, power.color);
@@ -2395,6 +2953,19 @@
     showMsg(power.message, 3.4, type === "flyer" ? "power" : "");
   }
 
+  function collectDisguisePower(source, power) {
+    if (game.disguiseReady || game.disguised) {
+      if (source) floatText("Ya listo", source.x, source.y - 22, power.color);
+      showMsg("Ya tenés un disfraz preparado. Usalo con Q antes de agarrar otro.", 3.6, "event");
+      updateDisguiseButton();
+      return;
+    }
+    game.disguiseReady = true;
+    if (source) floatText("Disfraz", source.x, source.y - 22, power.color);
+    showMsg("Encontraste un disfraz civil. Queda listo para activar con Q.", 4.2, "power");
+    updateDisguiseButton();
+  }
+
   function allyCollectRadius() {
     const arch = ARCHETYPES[game.archetype] || ARCHETYPES.estudiante;
     const musicBonus = game.musicTimer > 0 ? 7 : 0;
@@ -2403,8 +2974,7 @@
 
   function confuseCopsWithLeaf() {
     for (const cop of game.cops) {
-      cop.alert = false;
-      cop.alertTimer = 0;
+      clearCopAlert(cop);
       cop.path = [];
       cop.goalKey = "";
     }
@@ -2428,10 +2998,10 @@
     game.caughtCooldown = 2.2;
     game.flashTimer = 0.55;
     let scattered = 0;
-    if (game.runMode === "convocatoria" && game.crowdCount > 0) {
+    if (followersEnabled() && game.crowdCount > 0) {
       scattered = scatterCrowd();
     }
-    game.player.hairLevel = Math.min(3, 3 - game.lives);
+    game.player.hairLevel = playerHairLevel();
     burst(game.player.x, game.player.y, "#bfc0c0", 18);
     floatText("-pelo", game.player.x, game.player.y - 22, COLORS.danger);
 
@@ -2446,9 +3016,12 @@
     game.player.path = [];
     game.target = null;
     const scatterText = scattered ? ` Se dispersan ${scattered}.` : "";
-    showMsg((game.lives === 2
+    const captureMsg = game.lives === playerMaxLives() - 1
       ? "Te cortaron el pelo. Te sueltan cerca del kiosco."
-      : "Otra razzia. Una captura más y te rasuran entero.") + scatterText);
+      : game.lives <= 1
+        ? "Otra razzia. Una captura más y te rasuran entero."
+        : "Otra razzia. Te sueltan lejos de la ronda.";
+    showMsg(captureMsg + scatterText);
   }
 
   function scatterCrowd() {
@@ -2460,6 +3033,52 @@
     return lost;
   }
 
+  function currentConvocatoriaStep() {
+    if (game.runMode !== "convocatoria") return null;
+    return CONVOCATORIA_STEPS[Math.min(game.convocatoriaStep, CONVOCATORIA_STEPS.length - 1)] || null;
+  }
+
+  function shortStepLabel(step) {
+    if (!step) return "";
+    if (step.label === "Florida") return "F";
+    if (step.label === "Di Tella") return "DT";
+    if (step.label === "La Paz") return "LP";
+    if (step.label === "Plaza Francia") return "PF";
+    return step.label.slice(0, 2).toUpperCase();
+  }
+
+  function updateConvocatoriaObjective(dt) {
+    if (game.mode !== "playing" || game.runMode !== "convocatoria") return;
+    const step = currentConvocatoriaStep();
+    if (!step) return;
+    const enoughCrowd = game.crowdCount >= step.target;
+    const nearStep = game.player && dist(game.player, step) < 58;
+    if (enoughCrowd && nearStep) {
+      game.checkpointHold = Math.min(step.hold, game.checkpointHold + dt);
+      if (game.checkpointHold >= step.hold) {
+        completeConvocatoriaStep(step);
+      }
+      return;
+    }
+    game.checkpointHold = Math.max(0, game.checkpointHold - dt * 0.75);
+  }
+
+  function completeConvocatoriaStep(step) {
+    game.score += 30;
+    burst(step.x, step.y, COLORS.gold, 26);
+    floatText("+30 posta", step.x, step.y - 18, COLORS.gold);
+    game.checkpointHold = 0;
+    if (game.convocatoriaStep >= CONVOCATORIA_STEPS.length - 1) {
+      completeRound();
+      return;
+    }
+    game.convocatoriaStep += 1;
+    const count = summonAllies(2);
+    game.allyRespawnTimer = 0;
+    const next = currentConvocatoriaStep();
+    showMsg(`${step.label}: ${step.text} ${count ? `Se acercan ${count} más.` : ""} Próxima posta: ${next.label}.`, 6, "event");
+  }
+
   function safeRespawnPoint() {
     if (game.runMode !== "survival") return tileCenter(MAP.playerSpawn.x, MAP.playerSpawn.y);
     const tile = randomOpenTile({ avoidDanger: true, minPlayerDistance: 0 });
@@ -2469,9 +3088,6 @@
   function checkCollectObjective() {
     const cfg = currentConfig();
     if (cfg.objective.type === "collect" && game.collectedRound >= cfg.objective.target) {
-      completeRound();
-    }
-    if (cfg.objective.type === "convocatoria" && game.crowdCount >= cfg.objective.target) {
       completeRound();
     }
   }
@@ -2521,11 +3137,13 @@
   }
 
   function spawnTemporaryCop() {
-    const route = randomFrom(NPC_ROUTES.razzia);
+    const route = pickLeastCrowdedRoute(NPC_ROUTES.razzia, { preferFar: true });
     const cop = createCop(route, game.cops.length);
     cop.tempTimer = 20;
+    cop.state = "chase";
     cop.alert = true;
     cop.alertTimer = 1.2;
+    cop.lastKnown = game.player ? currentTile(game.player) : null;
     game.cops.push(cop);
     burst(cop.x, cop.y, COLORS.danger, 14);
   }
@@ -2586,6 +3204,7 @@
     const cfg = currentConfig();
     const type = forcedType || randomFrom(cfg.powerups);
     if (game.powerUps.some((p) => p.type === type)) return;
+    if (type === "sombrero" && (game.disguiseReady || game.disguised || activePower("sombrero"))) return;
     const tile = randomOpenTile({ avoidDanger: false, minPlayerDistance: 80 });
     if (!tile) return;
     const pt = tileCenter(tile.x, tile.y);
@@ -2740,12 +3359,101 @@
     return null;
   }
 
+  function drawDebugMapOverlay() {
+    const scale = 0.155;
+    const mw = Math.round(WORLD_W * scale);
+    const mh = Math.round(WORLD_H * scale);
+    const mx = Math.round((W - mw) / 2);
+    const my = Math.round((H - mh) / 2);
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "rgba(10,10,18,0.88)";
+    ctx.fillRect(mx - 4, my - 4, mw + 8, mh + 8);
+    ctx.globalAlpha = 1;
+
+    // Draw all tiles
+    for (let ty = 0; ty < ROWS; ty++) {
+      for (let tx = 0; tx < COLS; tx++) {
+        const px = mx + Math.round(tx * TILE * scale);
+        const py = my + Math.round(ty * TILE * scale);
+        const pw = Math.max(1, Math.round(TILE * scale));
+        ctx.fillStyle = isPathTile(tx, ty) ? COLORS.path : COLORS.grass;
+        ctx.fillRect(px, py, pw, pw);
+      }
+    }
+
+    // Count decorations per quadrant
+    const qW = Math.floor(COLS / 4);
+    const qH = Math.floor(ROWS / 4);
+    const counts = Array.from({ length: 4 }, () => Array(4).fill(0));
+    for (const t of MAP.trees) counts[Math.floor(t.y / qH) % 4][Math.floor(t.x / qW) % 4]++;
+    for (const b of MAP.benches) counts[Math.floor(b.y / qH) % 4][Math.floor(b.x / qW) % 4]++;
+    for (const e of MAP.easterEggs) counts[Math.floor((e.y / TILE) / qH) % 4][Math.floor((e.x / TILE) / qW) % 4]++;
+
+    for (let qy = 0; qy < 4; qy++) {
+      for (let qx = 0; qx < 4; qx++) {
+        const c = counts[qy][qx];
+        const low = c < 4;
+        const qpx = mx + Math.round(qx * qW * TILE * scale);
+        const qpy = my + Math.round(qy * qH * TILE * scale);
+        const qpw = Math.round(qW * TILE * scale);
+        const qph = Math.round(qH * TILE * scale);
+        if (low) {
+          ctx.fillStyle = "rgba(198,69,50,0.28)";
+          ctx.fillRect(qpx, qpy, qpw, qph);
+        }
+        ctx.strokeStyle = low ? COLORS.danger : "rgba(245,237,216,0.2)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(qpx, qpy, qpw, qph);
+        ctx.fillStyle = low ? COLORS.danger : COLORS.paper;
+        ctx.font = "bold 8px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`${c}`, qpx + qpw / 2, qpy + qph / 2 + 4);
+      }
+    }
+
+    // Overlay entities
+    for (const t of MAP.trees) {
+      ctx.fillStyle = COLORS.tree;
+      ctx.fillRect(mx + Math.round(t.x * TILE * scale), my + Math.round(t.y * TILE * scale), 2, 2);
+    }
+    for (const e of MAP.easterEggs) {
+      ctx.fillStyle = COLORS.neon;
+      ctx.fillRect(mx + Math.round(e.x * scale) - 1, my + Math.round(e.y * scale) - 1, 3, 3);
+    }
+    if (game.player) {
+      ctx.fillStyle = COLORS.player0;
+      ctx.fillRect(mx + Math.round(game.player.x * scale) - 2, my + Math.round(game.player.y * scale) - 2, 4, 4);
+    }
+    for (const cop of game.cops) {
+      ctx.fillStyle = cop.state === "chase" ? COLORS.danger : cop.state === "search" ? COLORS.gold : COLORS.police0;
+      ctx.fillRect(mx + Math.round(cop.x * scale) - 2, my + Math.round(cop.y * scale) - 2, 4, 4);
+    }
+
+    // Header
+    ctx.fillStyle = COLORS.paper;
+    ctx.font = "bold 8px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText("DEBUG MAP [Shift+M] · rojo = quadrante escaso", mx, my - 6);
+    ctx.restore();
+
+    // Console report (once per toggle)
+    if (!game._debugMapLogged) {
+      game._debugMapLogged = true;
+      console.table(counts.flatMap((row, qy) =>
+        row.map((c, qx) => ({ quadrant: `${qy},${qx}`, deco_count: c, sparse: c < 4 }))
+      ));
+    }
+  }
+
   function draw() {
     updateCamera();
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.translate(-game.camera.x, -game.camera.y);
     drawMap();
+    drawRazziaZone();
+    drawPatrolTraces();
     drawDetectionRings();
     drawEntities();
     drawEffects();
@@ -2753,7 +3461,9 @@
     drawViewportEffects();
     drawWorldFloaters();
     drawOffscreenIndicators();
+    drawObjectiveCard();
     drawMiniMap();
+    if (game._debugMap) drawDebugMapOverlay();
   }
 
   function drawMap() {
@@ -2768,6 +3478,7 @@
       }
     }
 
+    drawDistrictTints();
     drawPathEdges();
     drawGroundDetails();
     drawSafeZone();
@@ -2780,7 +3491,9 @@
     drawMapProps();
     drawSigns();
     drawPosters();
+    drawDistrictLandmarks();
     drawEasterEggs();
+    drawConvocatoriaCheckpoint();
     drawStreetLamps();
   }
 
@@ -2803,9 +3516,151 @@
       && y + h >= game.camera.y - pad && y <= game.camera.y + H + pad;
   }
 
+  function districtAt(x, y) {
+    for (let i = MAP.districtAreas.length - 1; i >= 0; i--) {
+      const area = MAP.districtAreas[i];
+      if (x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h) return area;
+    }
+    return null;
+  }
+
+  function tileDistrict(tx, ty) {
+    return districtAt(tx * TILE + TILE / 2, ty * TILE + TILE / 2);
+  }
+
+  function pathStyleAt(tx, ty) {
+    const district = tileDistrict(tx, ty);
+    return district ? district.pathStyle : "park";
+  }
+
+  function pathStylePalette(style) {
+    if (style === "urban") return { tint: "rgba(118,112,122,0.28)", seam: "rgba(245,237,216,0.22)", curb: "rgba(63,95,184,0.34)" };
+    if (style === "cafe") return { tint: "rgba(122,82,48,0.18)", seam: "rgba(255,224,102,0.18)", curb: "rgba(122,82,48,0.32)" };
+    if (style === "night") return { tint: "rgba(43,38,56,0.32)", seam: "rgba(217,79,138,0.20)", curb: "rgba(107,63,160,0.38)" };
+    if (style === "protest") return { tint: "rgba(198,69,50,0.16)", seam: "rgba(245,237,216,0.20)", curb: "rgba(198,69,50,0.42)" };
+    if (style === "fair") return { tint: "rgba(126,227,58,0.12)", seam: "rgba(245,237,216,0.24)", curb: "rgba(75,143,117,0.34)" };
+    if (style === "sand") return { tint: "rgba(242,197,107,0.18)", seam: "rgba(74,122,184,0.18)", curb: "rgba(168,142,84,0.34)" };
+    return { tint: "rgba(245,237,216,0.05)", seam: "rgba(70,57,44,0.20)", curb: "rgba(70,57,44,0.28)" };
+  }
+
+  function districtAccent(area) {
+    if (!area) return COLORS.gold;
+    if (area.pathStyle === "urban") return COLORS.posterPink;
+    if (area.pathStyle === "cafe") return COLORS.neon;
+    if (area.pathStyle === "night") return COLORS.posterPurple;
+    if (area.pathStyle === "protest") return COLORS.danger;
+    if (area.pathStyle === "fair") return COLORS.leafLight;
+    if (area.pathStyle === "sand") return COLORS.gold;
+    return COLORS.safe;
+  }
+
+  function drawDistrictTints() {
+    for (const area of MAP.districtAreas) {
+      if (area.showWorldTint === false) continue;
+      if (!isRectVisible(area.x, area.y, area.w, area.h, 0)) continue;
+      ctx.save();
+      ctx.fillStyle = area.tint;
+      ctx.fillRect(area.x, area.y, area.w, area.h);
+      ctx.restore();
+    }
+  }
+
+  function drawDistrictLandmarks() {
+    for (const area of MAP.districtAreas) {
+      if (area.plaque !== true) continue;
+      if (!isPointVisible(area.labelX, area.labelY, 96)) continue;
+      drawDistrictPlaque(area);
+    }
+  }
+
+  function drawDistrictPlaque(area) {
+    const x = Math.round(area.labelX);
+    const y = Math.round(area.labelY);
+    const w = Math.max(54, Math.min(86, area.short.length * 6 + 28));
+    ctx.save();
+    ctx.fillStyle = "rgba(23,17,29,0.34)";
+    ctx.fillRect(x - 4, y + 18, w - 8, 4);
+    ctx.fillStyle = "rgba(23,17,29,0.78)";
+    ctx.fillRect(x - 9, y - 13, w + 18, 24);
+    ctx.fillStyle = "rgba(245,237,216,0.88)";
+    ctx.fillRect(x - 7, y - 11, w + 14, 20);
+    ctx.strokeStyle = area.mini;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - 7.5, y - 11.5, w + 15, 21);
+    drawDistrictIcon(area.icon, x + 2, y + 1);
+    ctx.fillStyle = COLORS.black;
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(area.short.toUpperCase(), x + 14, y + 3);
+    ctx.restore();
+  }
+
+  function drawDistrictIcon(icon, x, y) {
+    ctx.fillStyle = COLORS.black;
+    if (icon === "coffee") {
+      ctx.fillRect(x - 5, y - 5, 8, 7);
+      ctx.fillRect(x + 3, y - 3, 3, 3);
+      ctx.fillStyle = COLORS.gold;
+      ctx.fillRect(x - 4, y + 2, 12, 2);
+    } else if (icon === "guitar") {
+      ctx.fillStyle = COLORS.wood;
+      ctx.fillRect(x + 2, y - 8, 2, 13);
+      ctx.fillStyle = COLORS.gold;
+      ctx.fillRect(x - 6, y - 1, 8, 7);
+      ctx.fillRect(x - 4, y - 5, 6, 6);
+    } else if (icon === "beach") {
+      ctx.fillStyle = COLORS.gold;
+      ctx.fillRect(x - 6, y + 1, 12, 3);
+      ctx.fillStyle = COLORS.waterLight;
+      ctx.fillRect(x - 6, y + 4, 12, 2);
+      ctx.fillStyle = COLORS.flower;
+      ctx.fillRect(x - 1, y - 7, 3, 8);
+    } else if (icon === "poster") {
+      ctx.fillStyle = COLORS.danger;
+      ctx.fillRect(x - 5, y - 6, 10, 11);
+      ctx.fillStyle = COLORS.paper;
+      ctx.fillRect(x - 3, y - 3, 6, 1);
+      ctx.fillRect(x - 3, y, 5, 1);
+    } else if (icon === "record") {
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = COLORS.gold;
+      ctx.fillRect(x - 1, y - 1, 2, 2);
+    } else if (icon === "pop") {
+      ctx.fillStyle = COLORS.posterPink;
+      ctx.fillRect(x - 6, y - 5, 12, 9);
+      ctx.fillStyle = COLORS.paper;
+      ctx.fillRect(x - 4, y - 3, 3, 4);
+      ctx.fillRect(x + 1, y - 3, 3, 4);
+    } else {
+      ctx.fillStyle = COLORS.tree;
+      ctx.fillRect(x - 5, y - 6, 10, 8);
+      ctx.fillStyle = COLORS.wood;
+      ctx.fillRect(x - 1, y + 1, 2, 5);
+    }
+  }
+
   function drawGrassTile(tx, ty) {
     const x = tx * TILE;
     const y = ty * TILE;
+    const style = pathStyleAt(tx, ty);
+    if (style === "urban" || style === "cafe" || style === "protest" || style === "night") {
+      ctx.fillStyle = style === "night" ? "rgba(43,38,56,0.16)" : style === "protest" ? "rgba(198,69,50,0.08)" : "rgba(200,184,120,0.10)";
+      ctx.fillRect(x, y, TILE, TILE);
+      if ((tx * 3 + ty * 5) % 6 === 0) {
+        ctx.fillStyle = style === "cafe" ? "rgba(122,82,48,0.22)" : "rgba(36,28,25,0.14)";
+        ctx.fillRect(x + 4, y + 9, 12, 2);
+      }
+    }
+    if (style === "sand") {
+      ctx.fillStyle = "rgba(242,197,107,0.16)";
+      ctx.fillRect(x, y, TILE, TILE);
+      if ((tx + ty) % 4 === 0) {
+        ctx.fillStyle = "rgba(74,122,184,0.18)";
+        ctx.fillRect(x + 3, y + 14, 12, 1);
+      }
+    }
     if ((tx * 7 + ty * 11) % 9 === 0) {
       ctx.fillStyle = COLORS.grassLight;
       ctx.fillRect(x + 3, y + 4, 4, 2);
@@ -2821,20 +3676,65 @@
       ctx.fillStyle = COLORS.leafDark;
       ctx.fillRect(x + 8, y + 10, 2, 2);
     }
+    // E1 extra variation
+    const h1 = (tx * 17 + ty * 31) % 48;
+    if (h1 < 3) {
+      // dirt patch
+      ctx.fillStyle = "rgba(90,65,40,0.32)";
+      ctx.fillRect(x + 6, y + 7, 8, 6);
+    } else if (h1 < 6) {
+      // tiny pebble cluster
+      ctx.fillStyle = COLORS.stone;
+      ctx.fillRect(x + 4, y + 12, 2, 2);
+      ctx.fillRect(x + 9, y + 10, 1, 1);
+      ctx.fillRect(x + 14, y + 13, 2, 1);
+    } else if (h1 < 9) {
+      // fallen leaf
+      ctx.fillStyle = COLORS.leafDark;
+      ctx.fillRect(x + 2, y + 15, 3, 2);
+      ctx.fillRect(x + 15, y + 5, 2, 3);
+    }
   }
 
   function drawPathTile(tx, ty) {
     const x = tx * TILE;
     const y = ty * TILE;
-    if (drawArtRegion("tiles", CITY_REGIONS.path, x, y, TILE, TILE)) {
-      return;
+    const style = pathStyleAt(tx, ty);
+    const palette = pathStylePalette(style);
+    const usedArt = drawArtRegion("tiles", CITY_REGIONS.path, x, y, TILE, TILE);
+    if (!usedArt) {
+      ctx.fillStyle = (tx + ty) % 2 ? COLORS.path : COLORS.pathLight;
+      ctx.fillRect(x, y, TILE, TILE);
     }
-    ctx.fillStyle = (tx + ty) % 2 ? COLORS.path : COLORS.pathLight;
+    ctx.fillStyle = palette.tint;
     ctx.fillRect(x, y, TILE, TILE);
-    ctx.fillStyle = COLORS.pathDark;
+    ctx.fillStyle = style === "urban" || style === "night" ? "rgba(36,28,25,0.38)" : COLORS.pathDark;
     ctx.fillRect(x, y + 19, TILE, 1);
     ctx.fillRect(x + 19, y, 1, TILE);
-    if ((tx + ty) % 3 === 0) ctx.fillRect(x + 4, y + 8, 7, 1);
+    if ((tx + ty) % 3 === 0) {
+      ctx.fillStyle = palette.seam;
+      ctx.fillRect(x + 4, y + 8, 7, 1);
+    }
+    if (style !== "park") {
+      ctx.fillStyle = palette.curb;
+      if ((tx + ty) % 2 === 0) ctx.fillRect(x + 1, y + 1, 4, 1);
+      if ((tx * 2 + ty) % 5 === 0) ctx.fillRect(x + 10, y + 12, 7, 1);
+    }
+    // E2 — desgaste y grietas deterministas
+    const ph = (tx * 11 + ty * 23) % 36;
+    if (ph < 2) {
+      ctx.fillStyle = "rgba(70,57,44,0.38)";
+      ctx.fillRect(x + 5, y + 6, 1, 5);
+      ctx.fillRect(x + 6, y + 9, 3, 1);
+    } else if (ph < 4) {
+      ctx.fillStyle = "rgba(70,57,44,0.28)";
+      ctx.fillRect(x + 3, y + 3, 6, 1);
+      ctx.fillRect(x + 7, y + 4, 1, 4);
+    } else if (ph === 4) {
+      // slightly darker worn patch
+      ctx.fillStyle = "rgba(36,28,25,0.14)";
+      ctx.fillRect(x + 2, y + 2, 16, 16);
+    }
   }
 
   function isPathTile(tx, ty) {
@@ -2988,18 +3888,18 @@
     }
 
     const vehicles = [
-      ["redCar", 0, 48, 48, 48, 598, 214, 38, 38],
-      ["blueCar", 0, 48, 48, 48, 768, 360, 38, 38],
-      ["redCar", 0, 96, 48, 48, 710, 206, 34, 34],
-      ["blueCar", 0, 144, 48, 48, 78, 520, 34, 34],
-      ["redCar", 0, 48, 48, 48, 928, 252, 36, 36],
-      ["blueCar", 0, 96, 48, 48, 1070, 530, 36, 36],
-      ["redCar", 0, 144, 48, 48, 622, 690, 34, 34],
-      ["blueCar", 0, 48, 48, 48, 1240, 396, 38, 38],
-      ["redCar", 0, 96, 48, 48, 1450, 612, 36, 36],
-      ["blueCar", 0, 144, 48, 48, 1160, 842, 34, 34],
-      ["redCar", 0, 48, 48, 48, 310, 1010, 36, 36],
-      ["blueCar", 0, 96, 48, 48, 1320, 1010, 36, 36]
+      ["redCar",  0,  48, 48, 48,  598, 196, 38, 38],  // east  – horiz road y≈180
+      ["blueCar", 0,  96, 48, 48,  772, 360, 38, 38],  // north – vert  road x≈780
+      ["redCar",  0, 144, 48, 48,  706, 196, 34, 34],  // west  – horiz road y≈180
+      ["blueCar", 0, 144, 48, 48,   78, 478, 34, 34],  // west  – horiz road y≈490
+      ["redCar",  0,  48, 48, 48,  928, 226, 36, 36],  // east  – cross rect y≈230
+      ["blueCar", 0,  48, 48, 48, 1066, 488, 36, 36],  // east  – horiz road y≈490
+      ["redCar",  0, 144, 48, 48,  622, 696, 34, 34],  // west  – horiz/vert road
+      ["blueCar", 0,   0, 48, 48, 1268, 398, 38, 38],  // south – vert  road x≈1280
+      ["redCar",  0,  96, 48, 48, 1412, 614, 36, 36],  // north – vert  road x≈1420
+      ["blueCar", 0, 144, 48, 48, 1100, 872, 34, 34],  // west  – horiz road y≈880 (clear building)
+      ["redCar",  0, 144, 48, 48,  310, 944, 36, 36],  // west  – horiz road y≈950
+      ["blueCar", 0,  48, 48, 48, 1288, 1034, 36, 36]  // east  – horiz road y≈1040
     ];
     for (const vehicle of vehicles) {
       if (isRectVisible(vehicle[5], vehicle[6], vehicle[7], vehicle[8], 80)) drawVehicle(...vehicle);
@@ -3012,6 +3912,8 @@
       ctx.save();
       ctx.translate(Math.round(prop.x), Math.round(prop.y));
       drawSpriteShadow(0, 12, 9, 3);
+      ctx.fillStyle = "rgba(245,237,216,0.14)";
+      ctx.fillRect(-13, 9, 26, 2);
       if (prop.kind === "boutique") {
         ctx.fillStyle = COLORS.posterPink;
         ctx.fillRect(-12, -12, 24, 18);
@@ -3083,6 +3985,16 @@
         ctx.fillRect(-3, -10, 6, 14);
         ctx.fillStyle = COLORS.gold;
         ctx.fillRect(4, -7, 6, 11);
+      } else if (prop.kind === "fire") {
+        ctx.fillStyle = COLORS.wood;
+        ctx.fillRect(-10, 4, 20, 3);
+        ctx.fillRect(-8, 7, 16, 3);
+        ctx.fillStyle = COLORS.danger;
+        ctx.fillRect(-4, -5, 8, 9);
+        ctx.fillStyle = COLORS.gold;
+        ctx.fillRect(-1, -9, 5, 11);
+        ctx.fillStyle = COLORS.paper;
+        ctx.fillRect(1, -6, 2, 4);
       }
       ctx.restore();
     }
@@ -3151,13 +4063,30 @@
   function drawSigns() {
     for (const sign of MAP.signs) {
       if (!isPointVisible(sign.x, sign.y, 72)) continue;
-      ctx.fillStyle = COLORS.wood;
-      ctx.fillRect(sign.x, sign.y + 14, 4, 18);
-      ctx.fillStyle = COLORS.gold;
-      ctx.fillRect(sign.x - 20, sign.y, 74, 14);
+      const area = districtAt(sign.x, sign.y);
+      const text = sign.short || (sign.text.length > 13 ? `${sign.text.slice(0, 12)}.` : sign.text);
+      const w = clamp(text.length * 6 + 16, 42, 92);
+      const x = Math.round(sign.x);
+      const y = Math.round(sign.y);
+      const fill = districtAccent(area);
+      const h = sign.mount === "wall" ? 13 : 14;
+      if (sign.mount !== "wall") {
+        ctx.fillStyle = COLORS.wood;
+        ctx.fillRect(x, y + h, 4, 18);
+      }
+      ctx.fillStyle = sign.mount === "wall" ? "rgba(23,17,29,0.34)" : "rgba(23,17,29,0.28)";
+      ctx.fillRect(x - w / 2 + 2, y + 3, w, h - 1);
+      ctx.fillStyle = COLORS.black;
+      ctx.fillRect(x - w / 2 - 1, y - 1, w + 2, h + 2);
+      ctx.fillStyle = fill;
+      ctx.fillRect(x - w / 2, y, w, h);
+      ctx.fillStyle = "rgba(245,237,216,0.24)";
+      ctx.fillRect(x - w / 2 + 2, y + 2, w - 4, 2);
       ctx.fillStyle = COLORS.black;
       ctx.font = "8px monospace";
-      ctx.fillText(sign.text, sign.x - 16, sign.y + 10);
+      ctx.textAlign = "center";
+      ctx.fillText(text, x, y + 9);
+      ctx.textAlign = "left";
     }
   }
 
@@ -3180,9 +4109,80 @@
   function drawEasterEggs() {
     for (const egg of MAP.easterEggs) {
       if (!isPointVisible(egg.x, egg.y, 56)) continue;
-      const discovered = game.discoveredEggs && game.discoveredEggs.has(egg.id);
+      const discovered = isEggKnown(egg);
       drawEasterEggMarker(egg, discovered);
+      if (egg.refuge) drawRefugeEggUI(egg);
     }
+  }
+
+  function drawRefugeEggUI(egg) {
+    const isActive = game.refugeTimer > 0 && game.currentRefuge === egg;
+    const isHolding = game.currentRefuge === egg && game.refugeHoldTimer > 0 && game.refugeTimer <= 0;
+
+    // Hold progress bar
+    if (isHolding) {
+      const pct = game.refugeHoldTimer / 2;
+      const barW = 30;
+      ctx.fillStyle = "rgba(23,17,29,0.78)";
+      ctx.fillRect(egg.x - barW / 2 - 1, egg.y - 26, barW + 2, 6);
+      ctx.fillStyle = COLORS.waterLight;
+      ctx.fillRect(egg.x - barW / 2, egg.y - 25, Math.round(barW * pct), 4);
+    }
+
+    // "Refugio" label when active
+    if (isActive) {
+      ctx.save();
+      ctx.globalAlpha = 0.88;
+      ctx.fillStyle = COLORS.water;
+      ctx.fillRect(egg.x - 18, egg.y - 26, 36, 10);
+      ctx.fillStyle = COLORS.white;
+      ctx.font = "bold 7px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("REFUGIO", egg.x, egg.y - 18);
+      ctx.restore();
+    }
+
+    // Cop warning: if any cop nearby while hiding
+    if (isActive && game.cops.some(c => dist(c, egg) < 80)) {
+      ctx.fillStyle = COLORS.danger;
+      ctx.font = "bold 9px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("!", egg.x + 14, egg.y - 24);
+    }
+  }
+
+  function drawConvocatoriaCheckpoint() {
+    const step = currentConvocatoriaStep();
+    if (!step || game.mode !== "playing") return;
+    if (!isPointVisible(step.x, step.y, 96)) return;
+    const pulse = 1 + Math.sin(performance.now() / 180) * 0.12;
+    const enough = game.crowdCount >= step.target;
+    const near = game.player && dist(game.player, step) < 58;
+    ctx.save();
+    ctx.translate(Math.round(step.x), Math.round(step.y));
+    ctx.globalAlpha = 0.26;
+    ctx.fillStyle = enough ? COLORS.gold : COLORS.paper;
+    ctx.beginPath();
+    ctx.arc(0, -5, 46 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = enough ? COLORS.gold : COLORS.paper;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-24, -32, 48, 48);
+    ctx.fillStyle = "rgba(23,17,29,0.82)";
+    ctx.fillRect(-42, -54, 84, 16);
+    ctx.fillStyle = enough ? COLORS.gold : COLORS.paper;
+    ctx.font = "bold 8px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(step.label, 0, -43);
+    if (near && enough) {
+      const pct = clamp(game.checkpointHold / step.hold, 0, 1);
+      ctx.fillStyle = "rgba(23,17,29,0.76)";
+      ctx.fillRect(-28, 22, 56, 6);
+      ctx.fillStyle = COLORS.leafLight;
+      ctx.fillRect(-27, 23, 54 * pct, 4);
+    }
+    ctx.restore();
   }
 
   function drawEasterEggMarker(egg, discovered) {
@@ -3276,6 +4276,32 @@
       ctx.font = "bold 8px monospace";
       ctx.fillText("?", egg.x - 3, egg.y - 1);
     }
+    if (egg.refuge && game.player) {
+      const near = dist(egg, game.player) < 84;
+      const holding = game.currentRefuge === egg && game.refugeHoldTimer > 0;
+      const active = game.currentRefuge === egg && game.refugeTimer > 0;
+      if (near || holding || active) {
+        const pct = active ? clamp(game.refugeTimer / 8, 0, 1) : clamp(game.refugeHoldTimer / 2, 0, 1);
+        const labelBelow = egg.refugeLabel === "below";
+        const labelY = egg.y + (labelBelow ? 15 : -37);
+        const barY = egg.y + (labelBelow ? 30 : 12);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = active ? COLORS.waterLight : COLORS.gold;
+        ctx.lineWidth = active ? 2 : 1;
+        ctx.strokeRect(egg.x - 16.5, egg.y - 22.5, 33, 30);
+        ctx.fillStyle = "rgba(23,17,29,0.78)";
+        ctx.fillRect(egg.x - 27, labelY, 54, 12);
+        ctx.fillStyle = active ? COLORS.waterLight : COLORS.paper;
+        ctx.font = "bold 7px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(active ? "REFUGIO" : holding ? "ENTRANDO" : "REFUGIO", egg.x, labelY + 8);
+        ctx.fillStyle = "rgba(23,17,29,0.78)";
+        ctx.fillRect(egg.x - 22, barY, 44, 5);
+        ctx.fillStyle = active ? COLORS.waterLight : COLORS.leafLight;
+        ctx.fillRect(egg.x - 21, barY + 1, Math.max(1, 42 * pct), 3);
+        ctx.textAlign = "left";
+      }
+    }
     ctx.restore();
   }
 
@@ -3284,6 +4310,17 @@
       if (!isPointVisible(lamp.x, lamp.y, 72)) continue;
       const lit = game.runMode === "survival" || game.round >= 1;
       if (lit) {
+        const coneAlpha = game.runMode === "survival" ? 0.10 : 0.055;
+        ctx.save();
+        ctx.globalAlpha = coneAlpha;
+        ctx.fillStyle = COLORS.lampGlow;
+        ctx.beginPath();
+        ctx.moveTo(lamp.x + 2, lamp.y + 8);
+        ctx.lineTo(lamp.x - 22, lamp.y + 52);
+        ctx.lineTo(lamp.x + 26, lamp.y + 52);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
         ctx.save();
         ctx.globalAlpha = game.runMode === "survival" ? 0.18 : 0.10;
         ctx.fillStyle = COLORS.lampGlow;
@@ -3368,12 +4405,20 @@
     ctx.fillRect(x + 6, y + h - 8, w - 12, 8);
     ctx.fillStyle = palette.awning;
     ctx.fillRect(x + 16, y + 26, w - 32, 9);
-    ctx.fillStyle = "#cfe2ea";
-    for (let wx = x + 18; wx < x + w - 22; wx += 24) {
+    const frameSlot = Math.floor(performance.now() / 4200) % 3;
+    for (let wi = 0, wx = x + 18; wx < x + w - 22; wx += 24, wi++) {
+      const lit = ((x + wi + frameSlot) % 3) !== 0;
+      ctx.fillStyle = lit ? "#cfe2ea" : "#1a1a2e";
       ctx.fillRect(wx, y + 42, 12, 14);
-      ctx.fillStyle = "#7cc6de";
+      ctx.fillStyle = lit ? "#7cc6de" : "#0d0d1a";
       ctx.fillRect(wx + 2, y + 44, 8, 4);
-      ctx.fillStyle = "#cfe2ea";
+      if (lit && ((x + wi) % 5 === 0)) {
+        // warm light — occasional occupied room
+        ctx.fillStyle = COLORS.lampGlow;
+        ctx.globalAlpha = 0.38;
+        ctx.fillRect(wx, y + 42, 12, 14);
+        ctx.globalAlpha = 1;
+      }
     }
     ctx.fillStyle = palette.door;
     ctx.fillRect(x + Math.floor(w / 2) - 7, y + h - 34, 14, 26);
@@ -3405,6 +4450,62 @@
     }
   }
 
+  function drawRazziaZone() {
+    const z = game.razziaZone;
+    if (!z) return;
+    const t = performance.now() / 400;
+    const pulse = Math.sin(t) * 0.06;
+    const urgent = z.timer <= 3;
+    ctx.save();
+    ctx.globalAlpha = urgent ? 0.34 + pulse * 2 : 0.18 + pulse;
+    ctx.fillStyle = "#c64532";
+    ctx.fillRect(z.x, z.y, z.w, z.h);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = urgent ? 0.82 : 0.55;
+    ctx.strokeStyle = "#c64532";
+    ctx.lineWidth = urgent ? 3 : 2;
+    ctx.setLineDash(urgent ? [] : [8, 5]);
+    ctx.strokeRect(z.x, z.y, z.w, z.h);
+    ctx.restore();
+    // Timer counter in center
+    const cx = z.x + z.w / 2;
+    const cy = z.y + z.h / 2;
+    ctx.save();
+    ctx.globalAlpha = 0.82;
+    ctx.fillStyle = "#17111d";
+    ctx.fillRect(cx - 14, cy - 11, 28, 16);
+    ctx.fillStyle = urgent ? "#ffe066" : "#f5edd8";
+    ctx.font = `bold 13px monospace`;
+    ctx.textAlign = "center";
+    ctx.fillText(`${Math.ceil(z.timer)}s`, cx, cy + 4);
+    ctx.restore();
+  }
+
+  function drawPatrolTraces() {
+    for (const cop of game.cops) {
+      if (cop.state !== "patrol" || !cop.route) continue;
+      const playerDist = game.player ? dist(cop, game.player) : 9999;
+      if (playerDist > 160) continue;
+      const alpha = Math.max(0, 0.07 - playerDist / 160 * 0.05);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = COLORS.danger;
+      for (let i = 0; i < cop.route.length; i++) {
+        const a = cop.route[i];
+        const b = cop.route[(i + 1) % cop.route.length];
+        const steps = Math.max(2, Math.floor(Math.hypot(b.x - a.x, b.y - a.y) / 2));
+        for (let s = 0; s < steps; s++) {
+          const t = s / steps;
+          const px = (a.x + (b.x - a.x) * t) * TILE + TILE / 2;
+          const py = (a.y + (b.y - a.y) * t) * TILE + TILE / 2;
+          if (isPointVisible(px, py, 8)) ctx.fillRect(Math.round(px) - 1, Math.round(py) - 1, 2, 2);
+        }
+      }
+      ctx.restore();
+    }
+  }
+
   function drawDetectionRings() {
     if (!game.player || !game.cops.length || activePower("press")) return;
     const cfg = currentConfig();
@@ -3412,16 +4513,15 @@
     const confused = leafConfusesPolice();
     for (const cop of game.cops) {
       const radius = detectionRadius(cfg, inDanger);
-      const nearPlayer = dist(cop, game.player) < radius * 1.12;
-      if (!cop.alert && !nearPlayer && !confused) continue;
+      if (!cop.alert && cop.state !== "search" && !confused) continue;
       ctx.save();
-      ctx.globalAlpha = cop.alert ? 0.2 : 0.12;
-      ctx.fillStyle = confused ? COLORS.leaf : (cop.alert ? COLORS.danger : COLORS.gold);
+      ctx.globalAlpha = cop.alert ? 0.2 : cop.state === "search" ? 0.11 : 0.12;
+      ctx.fillStyle = confused ? COLORS.leaf : (cop.alert ? COLORS.danger : cop.state === "search" ? COLORS.paper : COLORS.gold);
       ctx.beginPath();
       ctx.arc(cop.x, cop.y - 6, radius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = cop.alert ? 0.42 : 0.26;
-      ctx.strokeStyle = confused ? COLORS.leafLight : (cop.alert ? COLORS.danger : COLORS.gold);
+      ctx.globalAlpha = cop.alert ? 0.42 : cop.state === "search" ? 0.18 : 0.26;
+      ctx.strokeStyle = confused ? COLORS.leafLight : (cop.alert ? COLORS.danger : cop.state === "search" ? COLORS.paper : COLORS.gold);
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
@@ -3429,12 +4529,111 @@
   }
 
   function drawPlayer(player) {
+    drawPoetAura(player);
     drawSpriteShadow(player.x, player.y + 10, 13, 4);
     const frame = spriteFrame(player.walk, SPRITES.player.length);
-    const box = drawPixelSprite(SPRITES.player[frame], playerPalette(), player.x, player.y + 13, 2, player.dir < 0);
-    drawHair(box, player.hairLevel);
+    const palette = game.disguised
+      ? { S: COLORS.skin, P: COLORS.executive, L: COLORS.executiveLight, B: COLORS.black }
+      : playerPalette();
+    const box = drawPixelSprite(SPRITES.player[frame], palette, player.x, player.y + 13, 2, player.dir < 0);
+    if (!game.disguised) drawHair(box, playerHairLevel());
     ctx.fillStyle = COLORS.player2;
     ctx.fillRect(Math.round(player.x - 8), Math.round(player.y - 1), 16, 3);
+    if (game.disguiseReady && !game.disguised) drawDisguiseReadyBadge(player);
+    if (game.disguised) drawDisguiseAura(player);
+    if (game.refugeTimer > 0) drawRefugeAura(player);
+  }
+
+  function drawRefugeAura(player) {
+    const pulse = Math.sin(performance.now() / 220) * 0.08;
+    ctx.save();
+    ctx.globalAlpha = 0.22 + pulse;
+    ctx.fillStyle = COLORS.water;
+    ctx.fillRect(Math.round(player.x - 16), Math.round(player.y - 24), 32, 40);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.strokeStyle = COLORS.waterLight;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(Math.round(player.x - 16), Math.round(player.y - 24), 32, 40);
+    ctx.restore();
+    const pct = game.refugeTimer / 8;
+    const barW = 28;
+    const barX = Math.round(player.x - barW / 2);
+    const barY = Math.round(player.y - 32);
+    ctx.fillStyle = COLORS.black;
+    ctx.fillRect(barX - 1, barY - 1, barW + 2, 5);
+    ctx.fillStyle = pct > 0.35 ? COLORS.waterLight : COLORS.gold;
+    ctx.fillRect(barX, barY, Math.round(barW * pct), 3);
+    ctx.fillStyle = COLORS.black;
+    ctx.fillRect(Math.round(player.x - 23), Math.round(player.y - 44), 46, 10);
+    ctx.fillStyle = COLORS.paper;
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`REF ${Math.ceil(game.refugeTimer)}s`, Math.round(player.x), Math.round(player.y - 36));
+    ctx.textAlign = "left";
+  }
+
+  function drawDisguiseAura(player) {
+    const pulse = Math.sin(performance.now() / 280) * 0.06;
+    ctx.save();
+    ctx.globalAlpha = 0.28 + pulse;
+    ctx.fillStyle = COLORS.executiveLight;
+    ctx.fillRect(Math.round(player.x - 14), Math.round(player.y - 22), 28, 36);
+    ctx.restore();
+    ctx.fillStyle = COLORS.executiveLight;
+    ctx.font = "bold 9px monospace";
+    ctx.fillText("~", Math.round(player.x - 4), Math.round(player.y - 25));
+    const timer = activePower("sombrero") ? game.activePowerUp.timer : 0;
+    const pct = clamp(timer / POWERUPS.sombrero.duration, 0, 1);
+    const barW = 22;
+    const barX = Math.round(player.x - barW / 2);
+    const barY = Math.round(player.y - 30);
+    ctx.fillStyle = COLORS.black;
+    ctx.fillRect(barX - 1, barY - 1, barW + 2, 5);
+    ctx.fillStyle = pct > 0.4 ? COLORS.executiveLight : COLORS.danger;
+    ctx.fillRect(barX, barY, Math.round(barW * pct), 3);
+    ctx.fillStyle = COLORS.black;
+    ctx.fillRect(Math.round(player.x - 18), Math.round(player.y - 42), 36, 10);
+    ctx.fillStyle = COLORS.paper;
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`${Math.ceil(timer)}s`, Math.round(player.x), Math.round(player.y - 34));
+    ctx.textAlign = "left";
+  }
+
+  function drawDisguiseReadyBadge(player) {
+    const pulse = Math.sin(performance.now() / 260) * 0.08;
+    const x = Math.round(player.x + 14);
+    const y = Math.round(player.y - 19);
+    ctx.save();
+    ctx.globalAlpha = 0.86 + pulse;
+    ctx.fillStyle = "rgba(23,17,29,0.82)";
+    ctx.fillRect(x - 8, y - 12, 16, 16);
+    ctx.strokeStyle = COLORS.executiveLight;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - 8.5, y - 12.5, 17, 17);
+    drawPixelSprite(SPRITES.power.sombrero, powerPalette("sombrero"), x, y + 2, 1, false);
+    ctx.restore();
+  }
+
+  function drawPoetAura(player) {
+    if (game.archetype !== "poeta") return;
+    const radius = allyCollectRadius();
+    const pulse = Math.sin(performance.now() / 320) * 0.08;
+    ctx.save();
+    ctx.globalAlpha = 0.18 + pulse;
+    ctx.strokeStyle = COLORS.posterPink;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y - 2, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = COLORS.posterPink;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y - 2, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawHair(box, hairLevel) {
@@ -3459,6 +4658,10 @@
       ctx.fillStyle = COLORS.danger;
       ctx.font = "bold 13px monospace";
       ctx.fillText("!", cop.x - 4, cop.y - 20);
+    } else if (cop.state === "search") {
+      ctx.fillStyle = COLORS.gold;
+      ctx.font = "bold 11px monospace";
+      ctx.fillText("?", cop.x - 4, cop.y - 20);
     }
     if (activePower("press")) {
       ctx.fillStyle = COLORS.paper;
@@ -3489,6 +4692,10 @@
   }
 
   function drawNpc(npc) {
+    if (npc.type === "infiltrado") {
+      drawInfiltrado(npc);
+      return;
+    }
     const frames = SPRITES.npc[npc.type];
     const frame = spriteFrame(npc.walk, frames.length);
     const y = npc.y + 12;
@@ -3506,6 +4713,32 @@
       ctx.font = "bold 10px monospace";
       ctx.fillText("!", npc.x - 3, npc.y - 19);
     }
+  }
+
+  function drawInfiltrado(npc) {
+    const frame = spriteFrame(npc.walk, SPRITES.ally.length);
+    const y = npc.y + 12 + Math.sin(npc.walk * 0.8) * 1.5;
+    const near = game.player && dist(npc, game.player) < 84;
+    if (near) {
+      const blink = Math.sin(performance.now() / 115) > 0;
+      ctx.save();
+      ctx.globalAlpha = blink ? 0.26 : 0.14;
+      ctx.fillStyle = COLORS.danger;
+      ctx.fillRect(Math.round(npc.x - 13), Math.round(npc.y - 24), 26, 35);
+      ctx.globalAlpha = blink ? 0.8 : 0.46;
+      ctx.strokeStyle = COLORS.danger;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.round(npc.x - 13.5), Math.round(npc.y - 24.5), 27, 36);
+      ctx.fillStyle = COLORS.paper;
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("?", Math.round(npc.x), Math.round(npc.y - 27));
+      ctx.restore();
+    }
+    drawSpriteShadow(npc.x, npc.y + 10, 12, 4);
+    // Paleta de aliado pero ropa más apagada — un pixel diferente en el pelo
+    const palette = { H: "#5a2a10", S: COLORS.skin, A: "#a84010", L: "#c86030", B: COLORS.black, F: "#b82858" };
+    drawPixelSprite(SPRITES.ally[frame], palette, npc.x, y, 2, false);
   }
 
   function drawMusicAura(npc) {
@@ -3531,12 +4764,13 @@
 
   function drawPowerUp(item) {
     const y = item.y + 7 + Math.sin(item.bob) * 2;
-    drawSpriteShadow(item.x, item.y + 11, item.type === "flyer" ? 11 : 8, 3);
+    const large = item.type === "flyer" || item.type === "sombrero";
+    drawSpriteShadow(item.x, item.y + 11, large ? 11 : 8, 3);
     ctx.save();
     ctx.globalAlpha = 0.18 + Math.sin(item.bob * 1.6) * 0.05;
     ctx.fillStyle = POWERUPS[item.type].color;
     ctx.beginPath();
-    ctx.arc(item.x, item.y - 2, item.type === "flyer" ? 18 : 14, 0, Math.PI * 2);
+    ctx.arc(item.x, item.y - 2, large ? 18 : 14, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
     drawPixelSprite(SPRITES.power[item.type], powerPalette(item.type), item.x, y, 2, false);
@@ -3687,13 +4921,29 @@
 
   function guideTargets() {
     const targets = [];
+    if (game.razziaZone) {
+      targets.push({
+        x: game.razziaZone.x + game.razziaZone.w / 2,
+        y: game.razziaZone.y + game.razziaZone.h / 2,
+        label: "Z",
+        color: COLORS.danger,
+        priority: game.player && isInsideRect(game.player, game.razziaZone) ? 0 : 2
+      });
+    }
+    const step = currentConvocatoriaStep();
+    if (step) {
+      targets.push({ x: step.x, y: step.y, label: "M", color: COLORS.gold, priority: 1 });
+    }
     for (const cop of game.cops) {
-      if (!cop.alert) continue;
-      targets.push({ x: cop.x, y: cop.y, label: "!", color: COLORS.danger, priority: 0 });
+      if (cop.alert) {
+        targets.push({ x: cop.x, y: cop.y, label: "!", color: COLORS.danger, priority: 0 });
+      } else if (cop.state === "search") {
+        targets.push({ x: cop.x, y: cop.y, label: "?", color: COLORS.gold, priority: 3 });
+      }
     }
     for (const ally of game.allies) {
       if (ally.collected) continue;
-      targets.push({ x: ally.x, y: ally.y, label: "H", color: COLORS.gold, priority: 1 });
+      targets.push({ x: ally.x, y: ally.y, label: "H", color: COLORS.gold, priority: step ? 2 : 1 });
     }
     for (const item of game.powerUps) {
       if (item.collected) continue;
@@ -3706,7 +4956,7 @@
       targets.push({ x: npc.x, y: npc.y, label, color: type.color, priority: npc.type === "executive" ? 4 : npc.type === "musician" ? 2 : 3 });
     }
     for (const egg of MAP.easterEggs) {
-      if (game.discoveredEggs.has(egg.id)) continue;
+      if (isEggKnown(egg)) continue;
       if (dist(egg, game.player) > 220) continue;
       targets.push({ x: egg.x, y: egg.y, label: "?", color: COLORS.neon, priority: 5 });
     }
@@ -3769,10 +5019,19 @@
     ctx.fillRect(x + 2, y + 2, boxW - 4, boxH - 4);
     ctx.fillStyle = "rgba(90,138,60,0.86)";
     ctx.fillRect(mx, my, mw, mh);
+    for (const area of MAP.districtAreas) {
+      drawMiniRect(area, mx, my, sx, sy, area.mini);
+    }
     ctx.fillStyle = "rgba(200,184,120,0.68)";
     drawMiniMapPaths(mx, my, sx, sy);
     drawMiniRect(MAP.safeZone, mx, my, sx, sy, "rgba(75,143,117,0.95)");
     drawMiniRect(MAP.dangerZone, mx, my, sx, sy, "rgba(198,69,50,0.80)");
+    if (game.razziaZone) {
+      const urgent = game.razziaZone.timer <= 3;
+      drawMiniRect(game.razziaZone, mx, my, sx, sy, urgent ? "rgba(255,224,102,0.72)" : "rgba(198,69,50,0.64)");
+    }
+    const step = currentConvocatoriaStep();
+    if (step) drawMiniDot(step, mx, my, sx, sy, COLORS.gold, 4);
 
     ctx.strokeStyle = "rgba(23,17,29,0.75)";
     ctx.strokeRect(mx, my, mw, mh);
@@ -3786,20 +5045,193 @@
       drawMiniDot(npc, mx, my, sx, sy, type.color, npc.type === "musician" ? 3 : 2);
     }
     for (const egg of MAP.easterEggs) {
-      if (game.discoveredEggs.has(egg.id) || dist(egg, game.player) < 220) {
-        drawMiniDot(egg, mx, my, sx, sy, game.discoveredEggs.has(egg.id) ? COLORS.neon : COLORS.paper, 2);
+      const known = isEggKnown(egg);
+      if (known || dist(egg, game.player) < 220) {
+        drawMiniDot(egg, mx, my, sx, sy, known ? COLORS.neon : COLORS.paper, 2);
       }
     }
     for (const cop of game.cops) {
-      const reveal = activePower("fanzine") || cop.alert || dist(cop, game.player) < 140;
-      if (reveal) drawMiniDot(cop, mx, my, sx, sy, cop.alert ? COLORS.danger : COLORS.copLight, cop.alert ? 3 : 2);
+      const reveal = activePower("fanzine") || cop.alert || cop.state === "search" || dist(cop, game.player) < 140;
+      if (reveal) drawMiniDot(cop, mx, my, sx, sy, cop.alert ? COLORS.danger : cop.state === "search" ? COLORS.gold : COLORS.copLight, cop.alert ? 3 : 2);
     }
     drawMiniDot(game.player, mx, my, sx, sy, COLORS.player2, 3);
 
     ctx.fillStyle = COLORS.black;
     ctx.font = "7px monospace";
-    ctx.fillText("MAPA", x + 7, y + boxH - 4);
+    const currentDistrict = game.player ? districtAt(game.player.x, game.player.y) : null;
+    ctx.fillText(currentDistrict ? currentDistrict.short.toUpperCase() : "MAPA", x + 7, y + boxH - 4);
     ctx.restore();
+  }
+
+  function drawObjectiveCard() {
+    if (game.mode !== "playing" || !game.player) return;
+    const data = objectiveCardData();
+    if (!data) return;
+    const boxW = 220;
+    const boxH = 82;
+    const x = 8;
+    const y = 8;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(23,17,29,0.70)";
+    ctx.fillRect(x, y, boxW, boxH);
+    ctx.fillStyle = "rgba(245,237,216,0.86)";
+    ctx.fillRect(x + 2, y + 2, boxW - 4, boxH - 4);
+    ctx.fillStyle = "rgba(210,191,138,0.92)";
+    ctx.fillRect(x + 5, y + 5, boxW - 10, boxH - 10);
+    ctx.strokeStyle = "rgba(36,28,25,0.46)";
+    ctx.strokeRect(x + 5.5, y + 5.5, boxW - 11, boxH - 11);
+
+    ctx.fillStyle = COLORS.black;
+    ctx.font = "bold 9px monospace";
+    ctx.fillText(data.title, x + 12, y + 19);
+    ctx.fillStyle = COLORS.gold;
+    ctx.fillRect(x + boxW - 58, y + 10, 46, 14);
+    ctx.fillStyle = COLORS.black;
+    ctx.textAlign = "center";
+    ctx.fillText(data.tag, x + boxW - 35, y + 20);
+    ctx.textAlign = "left";
+
+    ctx.fillStyle = COLORS.black;
+    ctx.font = "bold 13px monospace";
+    ctx.fillText(data.heading, x + 12, y + 39);
+    ctx.fillStyle = data.statusColor || COLORS.black;
+    ctx.font = "10px monospace";
+    ctx.fillText(data.status, x + 12, y + 55);
+    ctx.fillStyle = data.detailColor || "rgba(36,28,25,0.76)";
+    ctx.fillText(data.detail, x + 12, y + 68);
+    ctx.textAlign = "right";
+    ctx.fillText(data.rightText, x + boxW - 12, y + 68);
+    ctx.textAlign = "left";
+
+    const barX = x + 102;
+    const barY = y + 48;
+    const barW = boxW - 116;
+    ctx.fillStyle = "rgba(36,28,25,0.32)";
+    ctx.fillRect(barX, barY, barW, 7);
+    ctx.fillStyle = data.barColor;
+    ctx.fillRect(barX + 1, barY + 1, Math.max(1, (barW - 2) * data.progress), 5);
+    ctx.strokeStyle = "rgba(36,28,25,0.42)";
+    ctx.strokeRect(barX + 0.5, barY + 0.5, barW, 7);
+    ctx.restore();
+  }
+
+  function objectiveCardData() {
+    let data = null;
+    if (game.runMode === "convocatoria") data = convocatoriaObjectiveCardData();
+    if (game.runMode === "story") data = storyObjectiveCardData(currentConfig());
+    return data ? applyObjectiveCardStatus(data) : null;
+  }
+
+  function applyObjectiveCardStatus(data) {
+    const priority = priorityObjectiveStatus();
+    if (!priority) return data;
+    return {
+      ...data,
+      status: priority.status,
+      detail: priority.detail,
+      rightText: priority.rightText,
+      progress: priority.progress,
+      barColor: priority.barColor,
+      statusColor: priority.statusColor,
+      detailColor: priority.detailColor
+    };
+  }
+
+  function priorityObjectiveStatus() {
+    if (game.razziaZone && game.player && isInsideRect(game.player, game.razziaZone)) {
+      const z = game.razziaZone;
+      return {
+        status: "Zona cerrada",
+        detail: "Salí de la cuadra",
+        rightText: `${Math.ceil(z.timer)}s`,
+        progress: clamp(z.timer / (z.duration || 13), 0, 1),
+        barColor: COLORS.danger,
+        statusColor: COLORS.danger,
+        detailColor: "rgba(36,28,25,0.86)"
+      };
+    }
+    if (game.refugeTimer > 0) {
+      return {
+        status: "Refugio activo",
+        detail: "La cana no entra",
+        rightText: `${Math.ceil(game.refugeTimer)}s`,
+        progress: clamp(game.refugeTimer / 8, 0, 1),
+        barColor: COLORS.waterLight,
+        statusColor: COLORS.water,
+        detailColor: "rgba(36,28,25,0.86)"
+      };
+    }
+    if (game.disguised) {
+      const timer = activePower("sombrero") ? game.activePowerUp.timer : 0;
+      return {
+        status: "Disfraz activo",
+        detail: "Aliados no te ven",
+        rightText: `${Math.ceil(timer)}s`,
+        progress: clamp(timer / POWERUPS.sombrero.duration, 0, 1),
+        barColor: COLORS.executiveLight,
+        statusColor: COLORS.executive,
+        detailColor: "rgba(36,28,25,0.86)"
+      };
+    }
+    return null;
+  }
+
+  function convocatoriaObjectiveCardData() {
+    const step = currentConvocatoriaStep();
+    if (!step) return null;
+    const left = Math.max(0, Math.ceil(currentConfig().objective.timeLimit - game.roundTimer));
+    const distance = Math.max(0, Math.ceil(dist(game.player, step) / TILE));
+    const hasCrowd = game.crowdCount >= step.target;
+    const nearStep = dist(game.player, step) < 58;
+    return {
+      title: `POSTA ${game.convocatoriaStep + 1}/${CONVOCATORIA_STEPS.length}`,
+      tag: shortStepLabel(step),
+      heading: step.label,
+      status: hasCrowd
+        ? (nearStep ? `Sostené ${Math.ceil(game.checkpointHold)}/${step.hold}s` : "Marcha lista")
+        : `Comitiva ${game.crowdCount}/${step.target}`,
+      detail: hasCrowd
+        ? (nearStep ? "No te alejes" : `A ${distance} cuadras`)
+        : "Juntá gente y llegá",
+      rightText: `${left}s`,
+      progress: hasCrowd
+        ? clamp(game.checkpointHold / step.hold, 0, 1)
+        : clamp(game.crowdCount / step.target, 0, 1),
+      barColor: hasCrowd ? COLORS.leafLight : COLORS.gold
+    };
+  }
+
+  function storyObjectiveCardData(cfg) {
+    if (!cfg || !cfg.objective) return null;
+    const objective = cfg.objective;
+    if (objective.type === "collect") {
+      const left = Math.max(0, Math.ceil(objective.timeLimit - game.roundTimer));
+      return {
+        title: `RONDA ${game.round + 1}/${ROUND_CONFIGS.length}`,
+        tag: `R${game.round + 1}`,
+        heading: cfg.title,
+        status: `Hippies ${game.collectedRound}/${objective.target}`,
+        detail: "Reuní y escapá",
+        rightText: `${left}s`,
+        progress: clamp(game.collectedRound / objective.target, 0, 1),
+        barColor: COLORS.gold
+      };
+    }
+    if (objective.type === "survive") {
+      const left = Math.max(0, Math.ceil(objective.duration - game.roundTimer));
+      return {
+        title: `RONDA ${game.round + 1}/${ROUND_CONFIGS.length}`,
+        tag: `R${game.round + 1}`,
+        heading: cfg.title,
+        status: `Sobreviví ${Math.floor(game.roundTimer)}/${objective.duration}s`,
+        detail: "Oleada policial",
+        rightText: `${left}s`,
+        progress: clamp(game.roundTimer / objective.duration, 0, 1),
+        barColor: COLORS.danger
+      };
+    }
+    return null;
   }
 
   function drawMiniMapPaths(mx, my, sx, sy) {
@@ -3923,7 +5355,7 @@
     }
     if (type === "mate")    return { G: COLORS.safe, B: COLORS.black };
     if (type === "fanzine") return { N: COLORS.black, P: COLORS.paper };
-    if (type === "sombrero") return { O: COLORS.gold, B: COLORS.black };
+    if (type === "sombrero") return { O: COLORS.paper, C: COLORS.executiveLight, B: COLORS.black };
     return { O: COLORS.poncho, P: COLORS.gold };
   }
 
@@ -4004,12 +5436,9 @@
     syncRunModeTheme();
     const cfg = currentConfig();
     const archLabel = (ARCHETYPES[game.archetype] || ARCHETYPES.estudiante).label;
-    hud.round.textContent = game.runMode === "survival"
-      ? `${archLabel} · Sup ${game.survivalLevel + 1}`
-      : game.runMode === "convocatoria"
-        ? `${archLabel} · Conv: ${game.crowdCount}`
-        : `${archLabel} · R${game.round + 1}: ${cfg.title}`;
-    const maxLives = (ARCHETYPES[game.archetype] || ARCHETYPES.estudiante).lives;
+    const archHudLabel = shortArchetypeLabel(archLabel);
+    hud.round.textContent = roundHudText(archHudLabel);
+    const maxLives = playerMaxLives();
     const hairLost = Math.max(0, maxLives - game.lives);
     const stars = "✦".repeat(Math.max(0, 3 - hairLost)) + "◇".repeat(Math.min(3, hairLost));
     hud.hair.textContent = `Pelo ${stars}`;
@@ -4023,11 +5452,31 @@
     hud.msg.textContent = game.msgTimer > 0 ? game.msgText : ambientMessage(cfg);
     hud.hairPill.classList.toggle("is-danger", game.lives <= 1);
     hud.powerPill.classList.toggle("is-danger", game.cops.some((cop) => cop.alert));
-    hud.powerPill.classList.toggle("is-power-active", Boolean(game.activePowerUp));
+    hud.powerPill.classList.toggle("is-power-active", Boolean(game.activePowerUp) || game.disguiseReady);
     hud.notorietyWrap.classList.toggle("is-hot", rumor >= 68);
     hud.msgWrap.classList.toggle("is-quote", game.msgTimer > 0 && game.msgKind === "quote");
     hud.msgWrap.classList.toggle("is-power", game.msgTimer > 0 && game.msgKind === "power");
     hud.msgWrap.classList.toggle("is-event", game.msgTimer > 0 && game.msgKind === "event");
+  }
+
+  function roundHudText(archHudLabel) {
+    const compact = window.matchMedia && window.matchMedia("(max-width: 520px)").matches;
+    if (game.runMode === "survival") {
+      const crowd = game.crowdCount ? (compact ? ` C${game.crowdCount}` : ` · C${game.crowdCount}`) : "";
+      return compact ? `Sup ${game.survivalLevel + 1}${crowd}` : `${archHudLabel} · Sup ${game.survivalLevel + 1}${crowd}`;
+    }
+    if (game.runMode === "convocatoria") {
+      const label = `P${Math.min(game.convocatoriaStep + 1, CONVOCATORIA_STEPS.length)}/${CONVOCATORIA_STEPS.length}`;
+      return compact ? label : `${archHudLabel} · ${label}`;
+    }
+    return compact ? `R${game.round + 1}` : `${archHudLabel} · R${game.round + 1}`;
+  }
+
+  function shortArchetypeLabel(label) {
+    if (label === "Estudiante") return "Est.";
+    if (label === "Músico") return "Mús.";
+    if (label === "Poeta") return "Poe.";
+    return label;
   }
 
   function objectiveText(cfg) {
@@ -4035,10 +5484,11 @@
       return `Objetivo: reunir ${cfg.objective.target} hippies antes de ${cfg.objective.timeLimit}s.`;
     }
     if (cfg.objective.type === "convocatoria") {
-      return `Objetivo: convocar ${cfg.objective.target} compañeros antes de ${cfg.objective.timeLimit}s.`;
+      const step = currentConvocatoriaStep() || CONVOCATORIA_STEPS[0];
+      return `Objetivo: reuní ${step.target} y llevá la marcha a ${step.label}.`;
     }
     if (cfg.objective.type === "endless") {
-      return "Objetivo: sobrevivir y reunir la mayor cantidad de hippies.";
+      return "Objetivo: sobrevivir, reunir hippies y sostener la comitiva.";
     }
     return `Objetivo: sobrevivir ${cfg.objective.duration}s a la oleada.`;
   }
@@ -4049,22 +5499,31 @@
       return `${game.collectedRound}/${cfg.objective.target} · ${left}s`;
     }
     if (cfg.objective.type === "endless") {
-      return `O${game.survivalLevel + 1} · ${Math.floor(game.roundTimer)}s`;
+      const crowd = game.crowdCount ? ` · ${game.crowdCount} comp.` : "";
+      return `O${game.survivalLevel + 1} · ${Math.floor(game.roundTimer)}s${crowd}`;
     }
     if (cfg.objective.type === "convocatoria") {
       const left = Math.max(0, Math.ceil(cfg.objective.timeLimit - game.roundTimer));
-      return `${game.crowdCount}/${cfg.objective.target} · ${left}s`;
+      const step = currentConvocatoriaStep() || CONVOCATORIA_STEPS[0];
+      if (game.crowdCount >= step.target) {
+        return `${shortStepLabel(step)} ${game.crowdCount}/${step.target} ${Math.ceil(game.checkpointHold)}/${step.hold}s`;
+      }
+      return `${shortStepLabel(step)} ${game.crowdCount}/${step.target} ${left}s`;
     }
     const left = Math.max(0, Math.ceil(cfg.objective.duration - game.roundTimer));
     return `Sobreviví ${left}s`;
   }
 
   function powerText() {
+    if (game.disguised) {
+      const timer = activePower("sombrero") ? game.activePowerUp.timer : 0;
+      return `Disfraz ${Math.ceil(timer)}s`;
+    }
     if (!game.activePowerUp) {
       if (isPlayerInSafeZone() && game.safeZoneTimer > 0) {
         return `Kiosco ${Math.ceil(game.safeZoneTimer)}s`;
       }
-      return "Libre";
+      return game.disguiseReady ? "Disf listo" : `Libre · C${activePoliceCount()}`;
     }
     const power = POWERUPS[game.activePowerUp.type];
     const short = game.activePowerUp.type === "flyer" && leafModeSummons()
@@ -4073,7 +5532,13 @@
     return `${short}: ${Math.ceil(game.activePowerUp.timer)}s`;
   }
 
+  function activePoliceCount() {
+    return game.cops.filter((cop) => cop.tempTimer == null || cop.tempTimer > 0).length;
+  }
+
   function ambientMessage(cfg) {
+    if (game.disguised) return "Disfrazado: la cana no te detecta, pero los aliados tampoco.";
+    if (game.disguiseReady) return "Disfraz listo: activalo con Q cuando necesites desaparecer.";
     if (activePower("press")) return "La prensa distrae a los patrulleros.";
     if (activePower("beatles")) return "El disco empuja tus pasos.";
     if (activePower("poncho")) return "El poncho achica el radio de detección.";
@@ -4083,6 +5548,8 @@
     if (isPlayerProtected()) return "El kiosco te cubre por unos segundos.";
     if (game.cops.some((cop) => cop.alert)) return "La cana te vio. Mové el cuerpo.";
     if (cfg.objective.type === "convocatoria") {
+      const step = currentConvocatoriaStep();
+      if (step) return `Convocatoria: llevá ${game.crowdCount}/${step.target} compañeros a ${step.label}.`;
       return "Convocatoria: cada compañero suma fuerza y también llama la atención.";
     }
     if (cfg.objective.type === "survive") return "Resistí la oleada y no te encierres en la comisaría.";
@@ -4116,11 +5583,14 @@
     const beats = INTRO_STORY.map(introBeatMarkup).join("");
     introOverlay.innerHTML = `
       <div class="intro-card" role="dialog" aria-modal="true" aria-label="Intro La Razzia">
-        <div class="intro-file"><span>EXPEDIENTE 1966</span><span>RESERVADO</span></div>
+        <div class="intro-file"><span>EXPEDIENTE 1966</span><span>PUJOL / LA JUVENTUD COMO DELITO</span></div>
+        <div class="intro-thesis">Buenos Aires se moderniza; el Estado mira el pelo, la ropa y las plazas como si fueran pruebas.</div>
         <div class="intro-strip" aria-hidden="true">${beats}</div>
         <div class="intro-title">La Razzia</div>
-        <div class="intro-caption">Una historia rápida de archivo, plaza y persecución.</div>
-        <button class="intro-skip" type="button" data-intro-action="continue">Continuar</button>
+        <div class="intro-caption">Una historia breve de archivo, cultura joven y persecución.</div>
+        <div class="intro-actions">
+          <button class="intro-skip" type="button" data-intro-action="continue">Continuar</button>
+        </div>
       </div>
     `;
   }
@@ -4131,6 +5601,7 @@
     const panDelay = (index * 0.24).toFixed(2);
     return `
       <section class="intro-beat intro-scene-${escapeHtml(beat.scene)}" data-label="${escapeHtml(beat.label)}" style="--beat-delay:${beatDelay}s;--scan-delay:${scanDelay}s;--pan-delay:${panDelay}s">
+        <span class="intro-frame-no">${String(index + 1).padStart(2, "0")}</span>
         <div class="intro-scene-stage">${introSceneMarkup(beat.scene)}</div>
         <div class="intro-caption-card">${escapeHtml(beat.caption)}</div>
       </section>
@@ -4140,7 +5611,8 @@
   function introSceneMarkup(scene) {
     if (scene === "file") {
       return `
-        <span class="intro-paper"></span>
+        <span class="intro-paper dossier"></span>
+        <span class="intro-evidence hair"></span>
         <span class="intro-record"></span>
         <span class="intro-leaf"></span>
         <span class="intro-person hippie" style="left:72%;bottom:30%"></span>
@@ -4150,6 +5622,9 @@
       return `
         <span class="intro-kiosk" style="left:8%;top:22%"></span>
         <span class="intro-building" style="right:8%;top:15%"></span>
+        <span class="intro-neon"></span>
+        <span class="intro-sign florida">Florida</span>
+        <span class="intro-sign ditella">Di Tella</span>
         <span class="intro-record" style="left:45%;top:34%"></span>
         <span class="intro-paper" style="left:30%;top:26%;transform:rotate(-8deg)"></span>
       `;
@@ -4158,12 +5633,17 @@
       return `
         <span class="intro-fountain"></span>
         <span class="intro-lamp"></span>
+        <span class="intro-crosswalk"></span>
+        <span class="intro-footsteps"></span>
+        <span class="intro-speech">¿venís?</span>
         <span class="intro-person hippie"></span>
       `;
     }
     if (scene === "patrol") {
       return `
         <span class="intro-building" style="right:7%;top:12%"></span>
+        <span class="intro-siren-beam"></span>
+        <span class="intro-razzia-tape"></span>
         <span class="intro-car"></span>
         <span class="intro-person cop"></span>
         <span class="intro-person hippie" style="left:18%;bottom:28%"></span>
@@ -4172,12 +5652,16 @@
     if (scene === "crowd") {
       return `
         <span class="intro-fountain" style="left:28%;top:42%"></span>
+        <span class="intro-speech crowd-call">plaza</span>
+        <span class="intro-rally-dots"></span>
         <span class="intro-crowd"><span></span><span></span><span></span><span></span></span>
         <span class="intro-leaf" style="right:18%;top:22%"></span>
       `;
     }
     return `
       <span class="intro-title-card">La Razzia</span>
+      <span class="intro-map"></span>
+      <span class="intro-archive-lines"></span>
       <span class="intro-paper" style="left:14%;top:26%;transform:rotate(8deg)"></span>
       <span class="intro-crowd" style="left:58%;bottom:24%;opacity:1"><span></span><span></span><span></span><span></span></span>
       <span class="intro-stamp">RAZZIA</span>
@@ -4196,17 +5680,34 @@
   function showRoundInterlude(roundIndex, callback) {
     const beats = ROUND_INTERLUDES[roundIndex];
     if (!beats) { callback(); return; }
+    game.mode = "interlude";
+    interludeActive = true;
+    clearInput();
+    updatePauseButton();
     introOverlay.hidden = false;
     introOverlay.innerHTML = `
-      <div class="intro-card" role="dialog" aria-modal="true" aria-label="Entre rondas">
+      <div class="intro-card interlude-card" role="dialog" aria-modal="true" aria-label="Entre rondas">
         <div class="intro-file" aria-hidden="true">
           <span>${escapeHtml(beats[0] ? beats[0].label : "")}</span>
-          <span>Buenos Aires</span>
+          <span>TRANSICIÓN</span>
         </div>
+        <div class="intro-thesis">El mapa cambia de tono: la cultura joven se expande y la vigilancia también.</div>
         <div class="intro-strip" aria-hidden="true">${beats.map(introBeatMarkup).join("")}</div>
-        <button class="intro-skip" type="button" data-intro-action="interlude-done">Continuar →</button>
+        <div class="intro-actions">
+          <button class="intro-skip" type="button" data-intro-action="interlude-done">Continuar</button>
+        </div>
       </div>`;
     introOverlay._interludeCb = callback;
+  }
+
+  function finishRoundInterlude() {
+    if (!interludeActive) return;
+    interludeActive = false;
+    introOverlay.hidden = true;
+    introOverlay.innerHTML = "";
+    const cb = introOverlay._interludeCb;
+    introOverlay._interludeCb = null;
+    if (cb) cb();
   }
 
   function introWasSeen() {
@@ -4233,6 +5734,7 @@
     game.mode = "menu";
     clearInput();
     updatePauseButton();
+    updateDisguiseButton();
     document.body.dataset.runMode = "menu";
     overlay.hidden = false;
     overlay.innerHTML = `
@@ -4254,6 +5756,7 @@
             <div class="menu-badge"><span class="menu-pixel-icon" data-sprite="round" aria-hidden="true"></span>Buenos Aires, 1966</div>
           </div>
         </div>
+        ${archiveMeterMarkup()}
         <div class="mode-select" aria-label="Elegir modo de juego">
           <button class="mode-card" type="button" data-action="start" data-mode="story">
             <span class="menu-pixel-icon" data-sprite="round" aria-hidden="true"></span>
@@ -4263,12 +5766,12 @@
           <button class="mode-card" type="button" data-action="start" data-mode="survival">
             <span class="menu-pixel-icon" data-sprite="power" aria-hidden="true"></span>
             <strong>Supervivencia</strong>
-            <small>Oleadas, hoja que convoca y plaza cada vez más caliente.</small>
+            <small>Oleadas, comitiva que te sigue y plaza cada vez más caliente.</small>
           </button>
           <button class="mode-card" type="button" data-action="start" data-mode="convocatoria">
             <span class="menu-pixel-icon" data-sprite="objective" aria-hidden="true"></span>
             <strong>Convocatoria</strong>
-            <small>Juntá multitud antes de que la ciudad mire demasiado.</small>
+            <small>Armá una marcha por postas antes de que la ciudad mire demasiado.</small>
           </button>
         </div>
         <div class="menu-config-row">
@@ -4278,14 +5781,16 @@
               ${Object.entries(ARCHETYPES).map(([key, a]) => `
               <button class="arch-chip ${game.archetype === key ? "arch-chip-active" : ""}"
                       type="button" data-action="archetype" data-type="${key}"
-                      title="${escapeHtml(a.desc)}">
+                      title="${escapeHtml(a.stat)}">
                 <strong>${escapeHtml(a.label)}</strong>
                 <span>${escapeHtml(a.desc)}</span>
+                <em>${escapeHtml(a.stat)}</em>
               </button>`).join("")}
             </div>
           </div>
           ${stylePickerMarkup()}
         </div>
+        <div class="menu-map-note">Una Buenos Aires condensada: plazas, calles y refugios de la cultura joven.</div>
         <p class="quote menu-quote">"La persecución, paradójicamente, ayudó a crear identidad colectiva." - Sergio Pujol</p>
         ${archiveShelfMarkup()}
       </div>
@@ -4326,7 +5831,7 @@
     overlay.innerHTML = `
       <div class="modal">
         <h2>${escapeHtml(title)}</h2>
-        <p>${modeName} | Puntos: ${game.score} | Tiempo: ${Math.floor(game.totalTime)}s | Hippies: ${game.hippiesTotal}${game.runMode === "convocatoria" ? ` | Convocados: ${game.crowdCount}` : ""}</p>
+        <p>${modeName} | Puntos: ${game.score} | Tiempo: ${Math.floor(game.totalTime)}s | Hippies: ${game.hippiesTotal}${followersEnabled() ? ` | Comitiva: ${game.crowdCount}` : ""}</p>
         <p class="quote">"${escapeHtml(quote.text)}" - Sergio Pujol, ${escapeHtml(quote.section)}</p>
         <div class="actions">
           <button class="primary" type="button" data-action="start" data-mode="${game.runMode}">${retryLabel}</button>
@@ -4452,11 +5957,11 @@
       score: game.score,
       time: Math.floor(game.totalTime),
       hippies: game.hippiesTotal,
-      crowd: game.runMode === "convocatoria" ? game.crowdCount : 0,
+      crowd: followersEnabled() ? game.crowdCount : 0,
       round: game.runMode === "survival"
         ? game.survivalLevel + 1
         : game.runMode === "convocatoria"
-          ? game.crowdCount
+          ? game.convocatoriaStep + 1
           : (victory ? ROUND_CONFIGS.length : game.round + 1),
       mode: game.runMode,
       date: new Date().toLocaleDateString("es-AR")
@@ -4487,6 +5992,17 @@
     } catch (error) {
       return new Set();
     }
+  }
+
+  function archiveCount(archive = game.archive) {
+    return MAP.easterEggs.filter((egg) => archive && archive.has(egg.id)).length;
+  }
+
+  function isEggKnown(egg) {
+    return Boolean(
+      egg
+      && ((game.archive && game.archive.has(egg.id)) || (game.discoveredEggs && game.discoveredEggs.has(egg.id)))
+    );
   }
 
   function saveArchiveId(id) {
@@ -4542,6 +6058,10 @@
   }
 
   function leafModeSummons() {
+    return game.runMode === "survival" || game.runMode === "convocatoria";
+  }
+
+  function followersEnabled() {
     return game.runMode === "survival" || game.runMode === "convocatoria";
   }
 
@@ -4646,11 +6166,7 @@
     const btn = e.target.closest("[data-intro-action]");
     if (!btn) return;
     if (btn.dataset.introAction === "interlude-done") {
-      introOverlay.hidden = true;
-      introOverlay.innerHTML = "";
-      const cb = introOverlay._interludeCb;
-      introOverlay._interludeCb = null;
-      if (cb) cb();
+      finishRoundInterlude();
       return;
     }
     finishIntro();
@@ -4668,11 +6184,22 @@
     muteButton.setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido");
   });
 
+  if (disguiseButton) {
+    disguiseButton.addEventListener("click", () => {
+      toggleDisguise();
+    });
+  }
+
   window.addEventListener("keydown", (e) => {
     const key = e.key.toLowerCase();
     if (introActive && ["enter", " ", "escape"].includes(key)) {
       e.preventDefault();
       finishIntro();
+      return;
+    }
+    if (interludeActive && ["enter", " ", "escape"].includes(key)) {
+      e.preventDefault();
+      finishRoundInterlude();
       return;
     }
     if (key === "p" && (game.mode === "playing" || game.mode === "paused")) {
@@ -4691,6 +6218,16 @@
         resumeGame();
         return;
       }
+    }
+    if (key === "m" && e.shiftKey && (game.mode === "playing" || game.mode === "paused")) {
+      e.preventDefault();
+      game._debugMap = !game._debugMap;
+      return;
+    }
+    if (key === "q" && game.mode === "playing") {
+      e.preventDefault();
+      toggleDisguise();
+      return;
     }
     if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
       if (game.mode === "playing") e.preventDefault();
