@@ -125,6 +125,32 @@
     let ctx = null;
     let muted = false;
     let alertCooldown = 0;
+    let musicInterval = null;
+    let musicMode = "";
+    let musicStep = 0;
+    let musicWanted = false;
+    const NOTE = {
+      C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
+      C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
+      C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99
+    };
+    const MUSIC_PATTERNS = {
+      story: {
+        tempo: 168,
+        bass: ["E3", null, "G3", null, "A3", null, "G3", null, "D3", null, "E3", null, "G3", null, "A3", "B3"],
+        lead: [null, "G4", null, "A4", "B4", null, "A4", null, "G4", null, "E4", null, "D4", "E4", null, null]
+      },
+      survival: {
+        tempo: 148,
+        bass: ["E3", "E3", null, "D3", "E3", null, "G3", null, "E3", "E3", null, "D3", "C3", null, "D3", null],
+        lead: [null, null, "G4", null, null, "A4", null, "G4", null, null, "E4", null, "D4", null, "E4", null]
+      },
+      convocatoria: {
+        tempo: 176,
+        bass: ["C3", null, "G3", null, "A3", null, "G3", null, "F3", null, "G3", null, "C4", null, "G3", null],
+        lead: ["E4", null, "G4", "A4", null, "C5", null, "A4", "G4", null, "E4", null, "D4", "E4", "G4", null]
+      }
+    };
     function ac() {
       if (!ctx) try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
       return ctx;
@@ -149,6 +175,83 @@
       o.connect(g); g.connect(a.destination);
       o.start(); o.stop(a.currentTime + dur);
     }
+    function musicTone(freq, type, dur, gainVal = 0.05, when = 0) {
+      const a = ac(); if (!a || muted) return;
+      if (a.state === "suspended") a.resume();
+      const start = a.currentTime + when;
+      const g = a.createGain();
+      g.gain.setValueAtTime(0.001, start);
+      g.gain.linearRampToValueAtTime(gainVal, start + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      const o = a.createOscillator();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, start);
+      o.connect(g);
+      g.connect(a.destination);
+      o.start(start);
+      o.stop(start + dur + 0.02);
+    }
+    function musicKick(when = 0) {
+      const a = ac(); if (!a || muted) return;
+      if (a.state === "suspended") a.resume();
+      const start = a.currentTime + when;
+      const g = a.createGain();
+      g.gain.setValueAtTime(0.08, start);
+      g.gain.exponentialRampToValueAtTime(0.001, start + 0.07);
+      const o = a.createOscillator();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(82, start);
+      o.frequency.exponentialRampToValueAtTime(48, start + 0.07);
+      o.connect(g);
+      g.connect(a.destination);
+      o.start(start);
+      o.stop(start + 0.08);
+    }
+    function musicHat(when = 0) {
+      musicTone(1800, "square", 0.025, 0.015, when);
+    }
+    function playMusicStep() {
+      const pattern = MUSIC_PATTERNS[musicMode] || MUSIC_PATTERNS.story;
+      const step = musicStep % pattern.bass.length;
+      const bass = pattern.bass[step];
+      const lead = pattern.lead[step];
+      if (bass) musicTone(NOTE[bass], "triangle", 0.16, musicMode === "survival" ? 0.055 : 0.045);
+      if (lead) musicTone(NOTE[lead], musicMode === "convocatoria" ? "square" : "sine", 0.12, 0.025);
+      if (step % 4 === 0) musicKick();
+      if (step % 2 === 1) musicHat();
+      if (musicMode === "survival" && step % 8 === 6) musicTone(NOTE.D3, "sawtooth", 0.09, 0.02);
+      musicStep += 1;
+    }
+    function stopMusicInterval() {
+      if (musicInterval) clearInterval(musicInterval);
+      musicInterval = null;
+    }
+    function startMusic(mode = "story") {
+      musicWanted = true;
+      musicMode = MUSIC_PATTERNS[mode] ? mode : "story";
+      stopMusicInterval();
+      if (muted) return;
+      const a = ac(); if (!a) return;
+      if (a.state === "suspended") a.resume();
+      musicStep = 0;
+      const pattern = MUSIC_PATTERNS[musicMode];
+      playMusicStep();
+      musicInterval = setInterval(playMusicStep, 60000 / pattern.tempo);
+    }
+    function pauseMusic() {
+      stopMusicInterval();
+    }
+    function resumeMusic(mode = musicMode || "story") {
+      if (!musicWanted || muted) return;
+      musicMode = MUSIC_PATTERNS[mode] ? mode : musicMode || "story";
+      stopMusicInterval();
+      const pattern = MUSIC_PATTERNS[musicMode];
+      musicInterval = setInterval(playMusicStep, 60000 / pattern.tempo);
+    }
+    function stopMusic() {
+      musicWanted = false;
+      stopMusicInterval();
+    }
     return {
       footstep()    { tone(90, "square", 0.04, 0.06); },
       collect()     { [261, 330, 392].forEach((f, i) => setTimeout(() => tone(f, "triangle", 0.12, 0.22), i * 60)); },
@@ -162,7 +265,19 @@
         setTimeout(() => tone(1100, "sawtooth", 0.28, 0.14), 300);
       },
       tickDown(dt)  { if (alertCooldown > 0) alertCooldown -= dt; },
-      toggle()      { muted = !muted; return muted; },
+      startMusic,
+      pauseMusic,
+      resumeMusic,
+      stopMusic,
+      toggle()      {
+        muted = !muted;
+        if (muted) {
+          pauseMusic();
+        } else if (musicWanted) {
+          resumeMusic(musicMode);
+        }
+        return muted;
+      },
       get muted()   { return muted; }
     };
   })();
@@ -419,6 +534,7 @@
   };
 
   const STYLE_KEY = "razzia_style";
+  const DIFFICULTY_KEY = "razzia_difficulty";
 
   const PALETTE_UNLOCKS = [
     { id: "default",   label: "Original",   threshold: 0,   P: "#6b3fa0", L: "#9b6fd0" },
@@ -432,6 +548,12 @@
     musico:     { label: "Músico",     desc: "Velocidad alta.",      stat: "Corre más rápido.",        speed: 145, collectRadius: 19, lives: 3 },
     poeta:      { label: "Poeta",      desc: "Radio amplio.",        stat: "Reúne desde más lejos.",    speed: 116, collectRadius: 30, lives: 3 },
     estudiante: { label: "Estudiante", desc: "Vida extra.",          stat: "Aguanta una captura más.",  speed: 116, collectRadius: 19, lives: 4 }
+  };
+
+  const DIFFICULTIES = {
+    normal: { label: "Normal", short: "N", desc: "Base",           stat: "Score x1",    score: 1,    cops: 0, speed: 1,    chase: 1,    detection: 1,    event: 1,    time: 1 },
+    dura:   { label: "Dura",   short: "D", desc: "Más cana",       stat: "Score x1.35", score: 1.35, cops: 1, speed: 1.07, chase: 1.08, detection: 1.1,  event: 1.12, time: 0.96 },
+    razzia: { label: "Razzia", short: "R", desc: "Ciudad cerrada", stat: "Score x1.75", score: 1.75, cops: 2, speed: 1.13, chase: 1.15, detection: 1.18, event: 1.25, time: 0.92 }
   };
 
   const DISTRICTS = {
@@ -1498,11 +1620,20 @@
     runMode: "story",
     archetype: "estudiante",
     playerStyle: (() => { try { return localStorage.getItem(STYLE_KEY) || "default"; } catch(e) { return "default"; } })(),
+    difficulty: (() => {
+      try {
+        const id = localStorage.getItem(DIFFICULTY_KEY) || "normal";
+        return DIFFICULTIES[id] ? id : "normal";
+      } catch(e) {
+        return "normal";
+      }
+    })(),
     round: 0,
     survivalLevel: 0,
     nextReinforcement: 30,
     lives: 3,
     score: 0,
+    scoreCarry: 0,
     combo: 0,
     totalTime: 0,
     lastScoreSecond: 0,
@@ -1550,6 +1681,9 @@
     infiltradoTellShown: false,
     refugeHintShown: false,
     policeSearchHintShown: false,
+    policeCoverageTimer: 10,
+    playerDistrictTimer: 0,
+    lastPlayerDistrictId: "",
     razziaZone: null,
     refugeTimer: 0,
     refugeHoldTimer: 0,
@@ -1596,6 +1730,7 @@
     game.nextReinforcement = 30;
     game.lives = (ARCHETYPES[game.archetype] || ARCHETYPES.estudiante).lives;
     game.score = 0;
+    game.scoreCarry = 0;
     game.combo = 0;
     game.totalTime = 0;
     game.lastScoreSecond = 0;
@@ -1620,6 +1755,9 @@
     game.infiltradoTellShown = false;
     game.refugeHintShown = false;
     game.policeSearchHintShown = false;
+    game.policeCoverageTimer = 10;
+    game.playerDistrictTimer = 0;
+    game.lastPlayerDistrictId = "";
     game.razziaZone = null;
     game.refugeTimer = 0;
     game.refugeHoldTimer = 0;
@@ -1649,6 +1787,7 @@
   }
 
   function startScenario(cfg, index) {
+    cfg = applyDifficultyConfig(cfg);
     const spawn = tileCenter(MAP.playerSpawn.x, MAP.playerSpawn.y);
     game.mode = "playing";
     game.round = index;
@@ -1707,6 +1846,7 @@
     updateHud();
     draw();
     startLoop();
+    SFX.startMusic(game.runMode);
   }
 
   function createCops(cfg) {
@@ -1743,6 +1883,7 @@
       lastKnown: null,
       searchQueue: [],
       searchIndex: 0,
+      coverageArea: "",
       role: "patrol",
       roleTimer: 0,
       repathTimer: 0,
@@ -1831,6 +1972,7 @@
     if (game.mode !== "playing") return;
     game.mode = "paused";
     clearInput();
+    SFX.pauseMusic();
     if (rafId) {
       cancelAnimationFrame(rafId);
       rafId = null;
@@ -1845,6 +1987,7 @@
     game.mode = "playing";
     clearInput();
     updatePauseButton();
+    SFX.resumeMusic(game.runMode);
     startLoop();
   }
 
@@ -1897,6 +2040,7 @@
     updateRefuge(dt);
     updatePlayer(dt);
     updateCrowd(dt);
+    updatePoliceCoverage(dt, cfg);
     updateCops(dt, cfg);
     updateAllies(dt, cfg);
     updateNpcs(dt);
@@ -1916,25 +2060,45 @@
   function currentConfig() {
     if (game.runMode === "survival") {
       const pressure = game.survivalLevel;
-      return {
+      return applyDifficultyConfig({
         ...SURVIVAL_CONFIG,
         copSpeed: SURVIVAL_CONFIG.copSpeed + pressure * 4,
         chaseBonus: SURVIVAL_CONFIG.chaseBonus + pressure * 2,
         detection: SURVIVAL_CONFIG.detection + pressure * 5,
         maxAllies: Math.min(8, SURVIVAL_CONFIG.maxAllies + Math.floor(pressure / 2))
-      };
+      });
     }
     if (game.runMode === "convocatoria") {
       const attention = convocatoriaAttention();
-      return {
+      return applyDifficultyConfig({
         ...CONVOCATORIA_CONFIG,
         copSpeed: CONVOCATORIA_CONFIG.copSpeed + attention * 0.35,
         chaseBonus: CONVOCATORIA_CONFIG.chaseBonus + attention * 0.25,
         detection: CONVOCATORIA_CONFIG.detection + attention,
         maxAllies: Math.min(10, CONVOCATORIA_CONFIG.maxAllies + Math.floor(game.crowdCount / 5))
-      };
+      });
     }
-    return ROUND_CONFIGS[game.round];
+    return applyDifficultyConfig(ROUND_CONFIGS[game.round]);
+  }
+
+  function currentDifficulty() {
+    return DIFFICULTIES[game.difficulty] || DIFFICULTIES.normal;
+  }
+
+  function applyDifficultyConfig(cfg) {
+    const difficulty = currentDifficulty();
+    const objective = { ...cfg.objective };
+    if (objective.timeLimit) objective.timeLimit = Math.max(20, Math.ceil(objective.timeLimit * difficulty.time));
+    if (objective.duration) objective.duration = Math.max(20, Math.ceil(objective.duration * difficulty.time));
+    return {
+      ...cfg,
+      objective,
+      cops: cfg.cops + difficulty.cops,
+      copSpeed: cfg.copSpeed * difficulty.speed,
+      chaseBonus: cfg.chaseBonus * difficulty.chase,
+      detection: cfg.detection * difficulty.detection,
+      difficulty: game.difficulty
+    };
   }
 
   function convocatoriaAttention() {
@@ -1979,6 +2143,187 @@
     showMsg(`${district.label}: ${district.caption}.`, 3.8, "event");
   }
 
+  function updatePoliceCoverage(dt, cfg) {
+    if (!game.player || game.mode !== "playing" || activePower("press")) return;
+    const playerDistrict = districtAt(game.player.x, game.player.y);
+    const districtId = playerDistrict ? playerDistrict.id : "";
+    if (districtId === game.lastPlayerDistrictId) {
+      game.playerDistrictTimer += dt;
+    } else {
+      game.lastPlayerDistrictId = districtId;
+      game.playerDistrictTimer = 0;
+    }
+
+    game.policeCoverageTimer -= dt;
+    if (game.policeCoverageTimer > 0) return;
+    game.policeCoverageTimer = policeCoverageInterval(cfg);
+
+    const target = choosePoliceCoverageDistrict(playerDistrict);
+    if (!target) return;
+    const needed = policeCoverageNeeded(target, target === playerDistrict);
+    const assigned = assignPoliceSweep(target, needed);
+    if (assigned > 0 && game.msgTimer <= 1.1) {
+      showMsg(`Radio policial: revisan ${target.short}.`, 3.4, "event");
+    }
+  }
+
+  function policeCoverageInterval(cfg) {
+    const difficulty = currentDifficulty();
+    const base = game.runMode === "story" ? 19 : game.runMode === "survival" ? 15 : 14;
+    const rumor = Math.floor(notorietyValue() / 25) * 1.3;
+    const modePressure = game.runMode === "survival" ? game.survivalLevel * 0.8 : game.runMode === "convocatoria" ? Math.floor(game.crowdCount / 5) * 0.7 : game.round * 0.6;
+    const patrolPressure = Math.max(0, (cfg.cops || game.cops.length) - 4) * 0.35;
+    return clamp(base - difficulty.cops * 1.7 - rumor - modePressure - patrolPressure + Math.random() * 3.5, 8.5, 23);
+  }
+
+  function choosePoliceCoverageDistrict(playerDistrict) {
+    const lingerLimit = policePlayerLingerLimit();
+    if (playerDistrict && game.playerDistrictTimer >= lingerLimit) {
+      const neededHere = policeCoverageNeeded(playerDistrict, true);
+      if (copsCoveringDistrict(playerDistrict) < neededHere && activeCoverageForDistrict(playerDistrict) < neededHere) {
+        return playerDistrict;
+      }
+    }
+
+    if (game.runMode === "story" && game.round === 0 && game.roundTimer < 22) return null;
+    const candidates = MAP.districtAreas
+      .filter((area) => area && activeCoverageForDistrict(area) < 1)
+      .filter((area) => copsCoveringDistrict(area) < policeCoverageNeeded(area, false));
+    if (!candidates.length) return null;
+
+    let best = null;
+    let bestScore = -Infinity;
+    for (const area of candidates) {
+      const center = districtCenter(area);
+      const southBias = center.y / WORLD_H;
+      const edgeBias = Math.abs(center.x - WORLD_W / 2) / (WORLD_W / 2) * 0.16;
+      const playerBias = area === playerDistrict ? 0.35 : 0;
+      const storyBias = game.runMode === "story" && game.round === 0 && area.id !== "plaza" ? -0.28 : 0;
+      const vacancy = 0.32 / (1 + copsCoveringDistrict(area));
+      const score = southBias + edgeBias + playerBias + storyBias + vacancy + Math.random() * 0.18;
+      if (score > bestScore) {
+        best = area;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+
+  function policePlayerLingerLimit() {
+    const difficulty = currentDifficulty();
+    const base = game.runMode === "story" ? 8.5 : game.runMode === "survival" ? 6.8 : 5.8;
+    return Math.max(4.8, base - difficulty.cops * 0.9 - Math.floor(notorietyValue() / 35) * 0.7);
+  }
+
+  function policeCoverageNeeded(area, playerFocused) {
+    if (!area) return 0;
+    let needed = playerFocused ? 1 : (game.runMode === "story" ? (game.round >= 1 ? 1 : 0) : 1);
+    if (playerFocused && game.runMode === "convocatoria" && game.crowdCount >= 7) needed = 2;
+    if (playerFocused && game.runMode === "survival" && (game.survivalLevel >= 2 || notorietyValue() >= 62)) needed = 2;
+    if (playerFocused && currentDifficulty().cops >= 2 && notorietyValue() >= 52) needed = 2;
+    return clamp(needed, 0, Math.max(1, Math.floor(game.cops.length / 3)));
+  }
+
+  function copsCoveringDistrict(area) {
+    if (!area) return 0;
+    const center = districtCenter(area);
+    const nearRadius = Math.max(145, Math.min(275, Math.max(area.w, area.h) * 0.35));
+    return game.cops.filter((cop) => {
+      return rectContains(area, cop) || cop.coverageArea === area.id || dist(cop, center) < nearRadius;
+    }).length;
+  }
+
+  function activeCoverageForDistrict(area) {
+    if (!area) return 0;
+    return game.cops.filter((cop) => cop.state === "search" && cop.role === "sweep" && cop.coverageArea === area.id).length;
+  }
+
+  function assignPoliceSweep(area, count) {
+    if (!area || count <= 0) return 0;
+    const center = districtCenter(area);
+    const available = game.cops
+      .filter((cop) => cop.state === "patrol" && cop.coverageArea !== area.id)
+      .map((cop) => ({ cop, d: dist(cop, center) }))
+      .sort((a, b) => a.d - b.d || a.cop.id - b.cop.id);
+    let assigned = 0;
+    for (const { cop } of available) {
+      if (startCopSweep(cop, area, assigned)) assigned += 1;
+      if (assigned >= count) break;
+    }
+    return assigned;
+  }
+
+  function startCopSweep(cop, area, order = 0) {
+    const queue = buildDistrictSweepQueue(cop, area, cop.id + order);
+    if (!queue.length) return false;
+    const center = districtCenter(area);
+    const duration = clamp(15 + dist(cop, center) / 78 + queue.length * 2.1, 16, 34);
+    cop.state = "search";
+    cop.role = "sweep";
+    cop.coverageArea = area.id;
+    cop.roleTimer = duration;
+    cop.alert = false;
+    cop.alertTimer = 0;
+    cop.searchTimer = duration;
+    cop.lastKnown = queue[0];
+    cop.searchQueue = queue;
+    cop.searchIndex = 0;
+    cop.path = [];
+    cop.goalKey = "";
+    cop.wait = order * 0.18;
+    return true;
+  }
+
+  function buildDistrictSweepQueue(cop, area, offset = 0) {
+    const targets = rotateTiles(districtSweepTiles(area), offset);
+    const start = currentTile(cop);
+    const seen = new Set();
+    const queue = [];
+    for (const tile of targets) {
+      const key = tileKey(tile.x, tile.y);
+      if (seen.has(key)) continue;
+      const path = bfs(start.x, start.y, tile.x, tile.y);
+      if (!path) continue;
+      seen.add(key);
+      queue.push(tile);
+      if (queue.length >= 5) break;
+    }
+    return queue;
+  }
+
+  function districtSweepTiles(area) {
+    const center = districtCenter(area);
+    const points = [
+      { x: area.labelX || center.x, y: area.labelY || center.y },
+      center,
+      { x: area.x + area.w * 0.25, y: area.y + area.h * 0.35 },
+      { x: area.x + area.w * 0.75, y: area.y + area.h * 0.35 },
+      { x: area.x + area.w * 0.28, y: area.y + area.h * 0.78 },
+      { x: area.x + area.w * 0.72, y: area.y + area.h * 0.78 }
+    ];
+    const seen = new Set();
+    const tiles = [];
+    for (const point of points) {
+      const tile = nearestOpenTileWide(pixelToTile(point.x, point.y), 8);
+      if (!tile) continue;
+      const key = tileKey(tile.x, tile.y);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      tiles.push(tile);
+    }
+    return tiles;
+  }
+
+  function rotateTiles(tiles, offset = 0) {
+    if (!tiles.length) return [];
+    const start = Math.abs(offset) % tiles.length;
+    return tiles.slice(start).concat(tiles.slice(0, start));
+  }
+
+  function districtCenter(area) {
+    return { x: area.x + area.w / 2, y: area.y + area.h / 2 };
+  }
+
   function updateSurvivalPressure() {
     if (game.runMode !== "survival" || game.roundTimer < game.nextReinforcement) return;
     game.survivalLevel += 1;
@@ -2006,7 +2351,8 @@
         ? Math.min(6, Math.floor(game.crowdCount / 3))
         : game.round;
     const rumorPressure = Math.floor(notorietyValue() / 28);
-    return Math.max(12, base - pressure * 1.4 - rumorPressure * 0.8 + Math.random() * 7);
+    const difficulty = currentDifficulty();
+    return Math.max(10, (base - pressure * 1.4 - rumorPressure * 0.8 + Math.random() * 7) / difficulty.event);
   }
 
   function chooseCityEvent() {
@@ -2105,9 +2451,17 @@
   function scoreSurvivalSeconds() {
     const whole = Math.floor(game.totalTime);
     if (whole > game.lastScoreSecond) {
-      game.score += whole - game.lastScoreSecond;
+      awardScore(whole - game.lastScoreSecond);
       game.lastScoreSecond = whole;
     }
+  }
+
+  function awardScore(base) {
+    const value = Math.max(0, base) * currentDifficulty().score + game.scoreCarry;
+    const points = Math.floor(value);
+    game.scoreCarry = value - points;
+    if (points > 0) game.score += points;
+    return points;
   }
 
   function updatePowerUp(dt) {
@@ -2399,7 +2753,8 @@
       if (cop.state === "chase" && !protectedByKiosk) {
         moveCopToTile(cop, copChaseTarget(cop), speed, dt, true);
       } else if (cop.state === "search") {
-        updateCopSearch(cop, baseSpeed * (cop.role === "flank" ? 0.9 : 0.78), dt);
+        const searchSpeed = cop.role === "flank" ? 0.9 : cop.role === "sweep" ? 0.84 : 0.78;
+        updateCopSearch(cop, baseSpeed * searchSpeed, dt);
       } else {
         updateCopPatrol(cop, speed, dt);
       }
@@ -2443,7 +2798,7 @@
       .map(({ cop }) => cop);
 
     others.forEach((cop, index) => {
-      if (cop.state === "search" && cop.roleTimer > 0) {
+      if (cop.state === "search" && cop.role !== "sweep" && cop.roleTimer > 0) {
         cop.lastKnown = lastKnown;
         return;
       }
@@ -2475,6 +2830,7 @@
     cop.searchQueue = [];
     cop.searchIndex = 0;
     cop.lastKnown = lastKnown;
+    cop.coverageArea = "";
   }
 
   function copSearchDuration(confused = false) {
@@ -2494,6 +2850,7 @@
     cop.lastKnown = known;
     cop.searchQueue = role === "flank" ? buildFlankQueue(cop, known) : buildSearchQueue(cop, known);
     cop.searchIndex = 0;
+    cop.coverageArea = "";
     cop.path = [];
     cop.goalKey = "";
     if (!game.policeSearchHintShown && game.mode === "playing") {
@@ -2512,6 +2869,7 @@
     cop.lastKnown = null;
     cop.searchQueue = [];
     cop.searchIndex = 0;
+    cop.coverageArea = "";
     cop.path = [];
     cop.goalKey = "";
   }
@@ -2758,17 +3116,17 @@
       game.musicTimer = 7;
       game.musicPulse = 0;
       game.musicSummonTimer = 0;
-      game.score += type.score;
+      const points = awardScore(type.score);
       burst(npc.x, npc.y, COLORS.gold, 22);
-      floatText("Canción +5", npc.x, npc.y - 22, COLORS.gold);
+      floatText(`Canción +${points}`, npc.x, npc.y - 22, COLORS.gold);
       showMsg("El músico arma una ronda: más compañeros se acercan por unos segundos.", 5.2, "event");
       return;
     }
 
     npc.collected = true;
-    game.score += type.score;
+    const points = awardScore(type.score);
     burst(npc.x, npc.y, type.color, 18);
-    floatText(`+${type.score}`, npc.x, npc.y - 18, type.color);
+    floatText(`+${points}`, npc.x, npc.y - 18, type.color);
 
     if (npc.type === "journalist") {
       game.activePowerUp = { type: "press", timer: 3 };
@@ -2778,7 +3136,7 @@
       return;
     }
 
-    showQuoteMessage("Bohemio +15");
+    showQuoteMessage(`Bohemio +${points}`);
   }
 
   function pushPlayerFrom(source, amount) {
@@ -2827,9 +3185,9 @@
     const prevCount = archiveCount(prevArchive);
     game.discoveredEggs.add(egg.id);
     game.archive = saveArchiveId(egg.id);
-    game.score += egg.bonus;
+    const points = awardScore(egg.bonus);
     burst(egg.x, egg.y, COLORS.neon, 24);
-    floatText(`+${egg.bonus} Archivo`, egg.x, egg.y - 18, COLORS.neon);
+    floatText(`+${points} Archivo`, egg.x, egg.y - 18, COLORS.neon);
     if (egg.summon) {
       summonAllies(egg.summon);
       game.allyRespawnTimer = 0;
@@ -2864,14 +3222,14 @@
 
   function collectAlly(ally) {
     ally.collected = true;
-    game.score += 10;
+    const points = awardScore(10);
     game.combo += 1;
     game.collectedRound += 1;
     game.hippiesTotal += 1;
     if (followersEnabled()) addCrowdMember(ally);
     SFX.collect();
     burst(ally.x, ally.y, COLORS.particle, 18);
-    floatText(game.combo >= 5 ? `+10 x${game.combo}` : "+10", ally.x, ally.y - 20, COLORS.gold);
+    floatText(game.combo >= 5 ? `+${points} x${game.combo}` : `+${points}`, ally.x, ally.y - 20, COLORS.gold);
     showQuoteMessage();
     checkCollectObjective();
   }
@@ -3064,9 +3422,9 @@
   }
 
   function completeConvocatoriaStep(step) {
-    game.score += 30;
+    const points = awardScore(30);
     burst(step.x, step.y, COLORS.gold, 26);
-    floatText("+30 posta", step.x, step.y - 18, COLORS.gold);
+    floatText(`+${points} posta`, step.x, step.y - 18, COLORS.gold);
     game.checkpointHold = 0;
     if (game.convocatoriaStep >= CONVOCATORIA_STEPS.length - 1) {
       completeRound();
@@ -3109,9 +3467,9 @@
   function completeRound() {
     if (game.mode !== "playing") return;
     if (game.runMode === "survival") return;
-    game.score += 50;
+    const points = awardScore(50);
     burst(game.player.x, game.player.y, COLORS.gold, 28);
-    floatText("+50", game.player.x, game.player.y - 26, COLORS.gold);
+    floatText(`+${points}`, game.player.x, game.player.y - 26, COLORS.gold);
     if (game.runMode === "convocatoria") {
       endGame("La plaza quedó tomada.", true);
       return;
@@ -3122,6 +3480,7 @@
     }
     const nextRound = game.round + 1;
     stopLoop();
+    SFX.stopMusic();
     if (ROUND_INTERLUDES[game.round] && !prefersReducedMotion()) {
       showRoundInterlude(game.round, () => { game.mode = "story"; showStory(nextRound); });
     } else {
@@ -3132,6 +3491,7 @@
 
   function endGame(title, victory = false) {
     game.mode = victory ? "victory" : "gameover";
+    SFX.stopMusic();
     saveCurrentScore(victory);
     showEndOverlay(title, victory);
   }
@@ -3342,6 +3702,28 @@
     let best = null;
     let bestDist = Infinity;
     for (let radius = 1; radius <= 4; radius++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        for (let dy = -radius; dy <= radius; dy++) {
+          const tx = tile.x + dx;
+          const ty = tile.y + dy;
+          if (isBlocked(tx, ty)) continue;
+          const score = Math.abs(dx) + Math.abs(dy);
+          if (score < bestDist) {
+            best = { x: tx, y: ty };
+            bestDist = score;
+          }
+        }
+      }
+      if (best) return best;
+    }
+    return null;
+  }
+
+  function nearestOpenTileWide(tile, maxRadius = 8) {
+    if (!isBlocked(tile.x, tile.y)) return tile;
+    let best = null;
+    let bestDist = Infinity;
+    for (let radius = 1; radius <= maxRadius; radius++) {
       for (let dx = -radius; dx <= radius; dx++) {
         for (let dy = -radius; dy <= radius; dy++) {
           const tx = tile.x + dx;
@@ -5444,7 +5826,7 @@
     hud.hair.textContent = `Pelo ${stars}`;
     hud.objective.textContent = objectiveProgressText(cfg);
     hud.power.textContent = powerText();
-    hud.score.textContent = `${game.score} pts`;
+    hud.score.textContent = scoreHudText();
     const rumor = notorietyValue();
     hud.notorietyLabel.textContent = notorietyStage(rumor);
     hud.notorietyFill.style.width = `${rumor}%`;
@@ -5457,6 +5839,13 @@
     hud.msgWrap.classList.toggle("is-quote", game.msgTimer > 0 && game.msgKind === "quote");
     hud.msgWrap.classList.toggle("is-power", game.msgTimer > 0 && game.msgKind === "power");
     hud.msgWrap.classList.toggle("is-event", game.msgTimer > 0 && game.msgKind === "event");
+  }
+
+  function scoreHudText() {
+    const difficulty = currentDifficulty();
+    const compact = window.matchMedia && window.matchMedia("(max-width: 520px)").matches;
+    if (difficulty.score === 1) return `${game.score} pts`;
+    return compact ? `${game.score} x${difficulty.score}` : `${game.score} pts x${difficulty.score}`;
   }
 
   function roundHudText(archHudLabel) {
@@ -5733,6 +6122,7 @@
   function showMenu() {
     game.mode = "menu";
     clearInput();
+    SFX.stopMusic();
     updatePauseButton();
     updateDisguiseButton();
     document.body.dataset.runMode = "menu";
@@ -5776,7 +6166,7 @@
         </div>
         <div class="menu-config-row">
           <div class="config-group">
-            <span class="config-label">Personaje</span>
+            <span class="config-label">Personaje · ${escapeHtml(activeArchetype().label)}</span>
             <div class="archetype-chips" aria-label="Elegir personaje">
               ${Object.entries(ARCHETYPES).map(([key, a]) => `
               <button class="arch-chip ${game.archetype === key ? "arch-chip-active" : ""}"
@@ -5789,10 +6179,10 @@
             </div>
           </div>
           ${stylePickerMarkup()}
+          ${difficultyPickerMarkup()}
         </div>
         <div class="menu-map-note">Una Buenos Aires condensada: plazas, calles y refugios de la cultura joven.</div>
         <p class="quote menu-quote">"La persecución, paradójicamente, ayudó a crear identidad colectiva." - Sergio Pujol</p>
-        ${archiveShelfMarkup()}
       </div>
     `;
     applyPixelIcons(overlay);
@@ -5800,7 +6190,7 @@
   }
 
   function showStory(nextRound) {
-    const cfg = ROUND_CONFIGS[nextRound];
+    const cfg = applyDifficultyConfig(ROUND_CONFIGS[nextRound]);
     const quote = PUJOL_QUOTES[cfg.quote];
     updatePauseButton();
     overlay.hidden = false;
@@ -5831,7 +6221,7 @@
     overlay.innerHTML = `
       <div class="modal">
         <h2>${escapeHtml(title)}</h2>
-        <p>${modeName} | Puntos: ${game.score} | Tiempo: ${Math.floor(game.totalTime)}s | Hippies: ${game.hippiesTotal}${followersEnabled() ? ` | Comitiva: ${game.crowdCount}` : ""}</p>
+        <p>${modeName} | ${escapeHtml(difficultyLabel())} | Puntos: ${game.score} | Tiempo: ${Math.floor(game.totalTime)}s | Hippies: ${game.hippiesTotal}${followersEnabled() ? ` | Comitiva: ${game.crowdCount}` : ""}</p>
         <p class="quote">"${escapeHtml(quote.text)}" - Sergio Pujol, ${escapeHtml(quote.section)}</p>
         <div class="actions">
           <button class="primary" type="button" data-action="start" data-mode="${game.runMode}">${retryLabel}</button>
@@ -5884,7 +6274,8 @@
     if (!scores.length) return `<p class="tiny">Sin records de ${label.toLowerCase()} todavía.</p>`;
     const items = scores.map((score, index) => {
       const crowdText = score.crowd ? ` - ${score.crowd} conv.` : "";
-      const itemLabel = `${index + 1}. ${score.score} pts - ${score.time}s - ${score.hippies} hippies${crowdText} - ${escapeHtml(score.date)}`;
+      const diffText = score.difficulty ? ` - ${escapeHtml(difficultyLabel(score.difficulty))}` : "";
+      const itemLabel = `${index + 1}. ${score.score} pts - ${score.time}s - ${score.hippies} hippies${crowdText}${diffText} - ${escapeHtml(score.date)}`;
       return `<li>${itemLabel}</li>`;
     }).join("");
     return `<p class="tiny">Records ${label}</p><ol class="scores" aria-label="Mejores puntajes ${label}">${items}</ol>`;
@@ -5902,14 +6293,38 @@
     if (styles.length <= 1) return "";
     const btns = styles.map(s => `
       <button class="style-swatch ${game.playerStyle === s.id ? "swatch-active" : ""}"
+              title="${escapeHtml(s.label)}"
               type="button" data-action="style" data-id="${escapeHtml(s.id)}"
               aria-label="${escapeHtml(s.label)}">
-        <span class="swatch-dot" style="background:${s.P}"></span>${escapeHtml(s.label)}
+        <span class="swatch-dot" style="--swatch-primary:${s.P};--swatch-light:${s.L}"></span><span class="swatch-name">${escapeHtml(s.label)}</span>
       </button>`).join("");
     return `<div class="config-group">
-      <span class="config-label">Color</span>
+      <span class="config-label">Color · ${escapeHtml(activeStyleLabel())}</span>
       <div class="style-select">${btns}</div>
     </div>`;
+  }
+
+  function difficultyPickerMarkup() {
+    const btns = Object.entries(DIFFICULTIES).map(([id, d]) => `
+      <button class="difficulty-chip ${game.difficulty === id ? "difficulty-chip-active" : ""}"
+              type="button" data-action="difficulty" data-id="${escapeHtml(id)}"
+              title="${escapeHtml(d.stat)}">
+        <strong>${escapeHtml(d.label)}</strong>
+        <span>${escapeHtml(d.stat.replace("Score ", ""))}</span>
+      </button>`).join("");
+    return `<div class="config-group difficulty-group">
+      <span class="config-label">Dificultad · ${escapeHtml(currentDifficulty().label)}</span>
+      <div class="difficulty-chips" aria-label="Elegir dificultad">${btns}</div>
+    </div>`;
+  }
+
+  function activeArchetype() {
+    return ARCHETYPES[game.archetype] || ARCHETYPES.estudiante;
+  }
+
+  function activeStyleLabel() {
+    const style = PALETTE_UNLOCKS.find(s => s.id === game.playerStyle) || PALETTE_UNLOCKS[0];
+    return style.label;
   }
 
   function archiveMeterMarkup() {
@@ -5964,6 +6379,8 @@
           ? game.convocatoriaStep + 1
           : (victory ? ROUND_CONFIGS.length : game.round + 1),
       mode: game.runMode,
+      difficulty: game.difficulty,
+      multiplier: currentDifficulty().score,
       date: new Date().toLocaleDateString("es-AR")
     };
     game.highScores = [...loadScores(game.runMode), entry]
@@ -6023,6 +6440,15 @@
 
   function savePlayerStyle(id) {
     try { localStorage.setItem(STYLE_KEY, id); } catch(e) {}
+  }
+
+  function saveDifficulty(id) {
+    try { localStorage.setItem(DIFFICULTY_KEY, id); } catch(e) {}
+  }
+
+  function difficultyLabel(id = game.difficulty) {
+    const difficulty = DIFFICULTIES[id] || DIFFICULTIES.normal;
+    return `${difficulty.label} ${difficulty.stat.replace("Score ", "")}`;
   }
 
   function scoreKey(mode) {
@@ -6160,6 +6586,7 @@
     if (action === "menu") showMenu();
     if (action === "archetype") { game.archetype = button.dataset.type || "estudiante"; showMenu(); }
     if (action === "style") { game.playerStyle = button.dataset.id || "default"; savePlayerStyle(game.playerStyle); showMenu(); }
+    if (action === "difficulty") { game.difficulty = button.dataset.id || "normal"; saveDifficulty(game.difficulty); showMenu(); }
   });
 
   introOverlay.addEventListener("click", (e) => {
