@@ -1513,6 +1513,92 @@
   }
 
   .menu-records,
+  .menu-tabs {
+    display: flex;
+    gap: 0.22rem;
+    margin: 0.3rem 0 0.2rem;
+  }
+
+  .menu-tab {
+    flex: 1;
+    padding: 0.3rem 0.5rem;
+    background: rgba(245,237,216,0.07);
+    border: 8px solid transparent;
+    border-image: var(--ui-brown) 16 fill / 8px / 0 stretch;
+    color: #cfc2ae;
+    font: 700 0.68rem/1 "Courier New", Courier, monospace;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.12s;
+  }
+
+  .menu-tab-active {
+    border-image: var(--ui-brown-pressed) 16 fill / 8px / 0 stretch;
+    color: #ffe066;
+    background: rgba(245,237,216,0.14);
+  }
+
+  .archive-tab-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.28rem;
+    max-height: 14rem;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+    margin-top: 0.1rem;
+  }
+
+  .archive-card {
+    padding: 0.32rem 0.4rem;
+    background: rgba(245,237,216,0.07);
+    border: 8px solid transparent;
+    border-image: var(--ui-brown-pressed) 16 fill / 8px / 0 stretch;
+    color: #f5edd8;
+    font-size: 0.6rem;
+    line-height: 1.18;
+  }
+
+  .archive-card-locked {
+    display: grid;
+    place-items: center;
+    min-height: 2.4rem;
+    color: rgba(245,237,216,0.28);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+  }
+
+  .archive-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.28rem;
+    margin-bottom: 0.2rem;
+    flex-wrap: wrap;
+  }
+
+  .archive-card-icon {
+    font-size: 0.72rem;
+    color: #e8a030;
+  }
+
+  .archive-card-head strong {
+    color: #ffe066;
+    font-size: 0.64rem;
+  }
+
+  .archive-card-section {
+    color: #9b8c7a;
+    font-size: 0.54rem;
+    letter-spacing: 0.03em;
+  }
+
+  .archive-card-text {
+    margin: 0;
+    color: #cfc2ae;
+    font-size: 0.58rem;
+    line-height: 1.22;
+  }
+
   .menu-archive {
     margin-top: 0.45rem;
     color: #cfc2ae;
@@ -1933,6 +2019,13 @@
       margin-top: 0.24rem;
       padding: 0.24rem 0.3rem;
       font-size: 0.62rem;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .archive-tab-list {
+      grid-template-columns: 1fr;
+      max-height: 12rem;
     }
   }
 

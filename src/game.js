@@ -125,32 +125,16 @@
     let ctx = null;
     let muted = false;
     let alertCooldown = 0;
-    let musicInterval = null;
+    const musicEl = {
+      story:        new Audio("assets/music/story.mp3"),
+      survival:     new Audio("assets/music/survival.mp3"),
+      convocatoria: new Audio("assets/music/convocatoria.mp3"),
+    };
+    Object.values(musicEl).forEach(el => { el.loop = true; el.volume = 0.75; });
     let musicMode = "";
-    let musicStep = 0;
     let musicWanted = false;
-    const NOTE = {
-      C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
-      C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
-      C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99
-    };
-    const MUSIC_PATTERNS = {
-      story: {
-        tempo: 168,
-        bass: ["E3", null, "G3", null, "A3", null, "G3", null, "D3", null, "E3", null, "G3", null, "A3", "B3"],
-        lead: [null, "G4", null, "A4", "B4", null, "A4", null, "G4", null, "E4", null, "D4", "E4", null, null]
-      },
-      survival: {
-        tempo: 148,
-        bass: ["E3", "E3", null, "D3", "E3", null, "G3", null, "E3", "E3", null, "D3", "C3", null, "D3", null],
-        lead: [null, null, "G4", null, null, "A4", null, "G4", null, null, "E4", null, "D4", null, "E4", null]
-      },
-      convocatoria: {
-        tempo: 176,
-        bass: ["C3", null, "G3", null, "A3", null, "G3", null, "F3", null, "G3", null, "C4", null, "G3", null],
-        lead: ["E4", null, "G4", "A4", null, "C5", null, "A4", "G4", null, "E4", null, "D4", "E4", "G4", null]
-      }
-    };
+    let musicTense = false;
+    let activeMusicEl = null;
     function ac() {
       if (!ctx) try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
       return ctx;
@@ -175,82 +159,36 @@
       o.connect(g); g.connect(a.destination);
       o.start(); o.stop(a.currentTime + dur);
     }
-    function musicTone(freq, type, dur, gainVal = 0.05, when = 0) {
-      const a = ac(); if (!a || muted) return;
-      if (a.state === "suspended") a.resume();
-      const start = a.currentTime + when;
-      const g = a.createGain();
-      g.gain.setValueAtTime(0.001, start);
-      g.gain.linearRampToValueAtTime(gainVal, start + 0.015);
-      g.gain.exponentialRampToValueAtTime(0.001, start + dur);
-      const o = a.createOscillator();
-      o.type = type;
-      o.frequency.setValueAtTime(freq, start);
-      o.connect(g);
-      g.connect(a.destination);
-      o.start(start);
-      o.stop(start + dur + 0.02);
-    }
-    function musicKick(when = 0) {
-      const a = ac(); if (!a || muted) return;
-      if (a.state === "suspended") a.resume();
-      const start = a.currentTime + when;
-      const g = a.createGain();
-      g.gain.setValueAtTime(0.08, start);
-      g.gain.exponentialRampToValueAtTime(0.001, start + 0.07);
-      const o = a.createOscillator();
-      o.type = "triangle";
-      o.frequency.setValueAtTime(82, start);
-      o.frequency.exponentialRampToValueAtTime(48, start + 0.07);
-      o.connect(g);
-      g.connect(a.destination);
-      o.start(start);
-      o.stop(start + 0.08);
-    }
-    function musicHat(when = 0) {
-      musicTone(1800, "square", 0.025, 0.015, when);
-    }
-    function playMusicStep() {
-      const pattern = MUSIC_PATTERNS[musicMode] || MUSIC_PATTERNS.story;
-      const step = musicStep % pattern.bass.length;
-      const bass = pattern.bass[step];
-      const lead = pattern.lead[step];
-      if (bass) musicTone(NOTE[bass], "triangle", 0.16, musicMode === "survival" ? 0.055 : 0.045);
-      if (lead) musicTone(NOTE[lead], musicMode === "convocatoria" ? "square" : "sine", 0.12, 0.025);
-      if (step % 4 === 0) musicKick();
-      if (step % 2 === 1) musicHat();
-      if (musicMode === "survival" && step % 8 === 6) musicTone(NOTE.D3, "sawtooth", 0.09, 0.02);
-      musicStep += 1;
-    }
-    function stopMusicInterval() {
-      if (musicInterval) clearInterval(musicInterval);
-      musicInterval = null;
+    function stopMusicEl() {
+      if (activeMusicEl) { activeMusicEl.pause(); activeMusicEl.currentTime = 0; activeMusicEl = null; }
     }
     function startMusic(mode = "story") {
       musicWanted = true;
-      musicMode = MUSIC_PATTERNS[mode] ? mode : "story";
-      stopMusicInterval();
+      const key = musicEl[mode] ? mode : "story";
+      if (musicMode === key && activeMusicEl && !activeMusicEl.paused) return;
+      if (activeMusicEl) { activeMusicEl.pause(); activeMusicEl.currentTime = 0; }
+      musicMode = key;
       if (muted) return;
-      const a = ac(); if (!a) return;
-      if (a.state === "suspended") a.resume();
-      musicStep = 0;
-      const pattern = MUSIC_PATTERNS[musicMode];
-      playMusicStep();
-      musicInterval = setInterval(playMusicStep, 60000 / pattern.tempo);
+      activeMusicEl = musicEl[key];
+      activeMusicEl.volume = musicTense ? 0.45 : 0.75;
+      activeMusicEl.play().catch(() => {});
     }
     function pauseMusic() {
-      stopMusicInterval();
+      if (activeMusicEl) activeMusicEl.pause();
     }
     function resumeMusic(mode = musicMode || "story") {
       if (!musicWanted || muted) return;
-      musicMode = MUSIC_PATTERNS[mode] ? mode : musicMode || "story";
-      stopMusicInterval();
-      const pattern = MUSIC_PATTERNS[musicMode];
-      musicInterval = setInterval(playMusicStep, 60000 / pattern.tempo);
+      const key = musicEl[mode] ? mode : musicMode || "story";
+      if (musicMode !== key) { startMusic(key); return; }
+      if (activeMusicEl) activeMusicEl.play().catch(() => {});
     }
     function stopMusic() {
       musicWanted = false;
-      stopMusicInterval();
+      stopMusicEl();
+    }
+    function setTense(tense) {
+      musicTense = !!tense;
+      if (activeMusicEl) activeMusicEl.volume = musicTense ? 0.45 : 0.75;
     }
     return {
       footstep()    { tone(90, "square", 0.04, 0.06); },
@@ -269,10 +207,13 @@
       pauseMusic,
       resumeMusic,
       stopMusic,
+      setTense,
       toggle()      {
         muted = !muted;
         if (muted) {
-          pauseMusic();
+          if (activeMusicEl) activeMusicEl.pause();
+        } else if (musicWanted && activeMusicEl) {
+          activeMusicEl.play().catch(() => {});
         } else if (musicWanted) {
           resumeMusic(musicMode);
         }
@@ -869,7 +810,7 @@
       { x: 1040, y: 626, text: "Costanera", mount: "wall" },
       { x: 696, y: 96, text: "Galeria", mount: "wall" },
       { x: 724, y: 420, text: "La Paz", mount: "wall" },
-      { x: 1110, y: 606, text: "Gesell", mount: "wall" },
+      { x: 1480, y: 860, text: "Gesell", mount: "wall" },
       { x: 1284, y: 282, text: "Galeria Este", short: "Galeria E.", mount: "wall" },
       { x: 1424, y: 172, text: "J. Alvarez", mount: "wall" },
       { x: 1210, y: 824, text: "La Perla", mount: "wall" },
@@ -1701,6 +1642,7 @@
 
   let blockedTiles = new Set();
   let rafId = null;
+  let menuTab = "play";
   let lastTime = 0;
   let introActive = false;
   let interludeActive = false;
@@ -2051,6 +1993,7 @@
     updateParticles(dt);
     updateFloaters(dt);
     checkTimedObjective(cfg);
+    SFX.setTense(game.cops.some(c => c.alert));
     updateCamera();
     updateDistrictHint();
     updateHud();
@@ -2734,7 +2677,7 @@
     for (const cop of game.cops) {
       if (frozen) continue;
       if (cop.seesPlayer && cop.state === "chase") {
-        cop.alertTimer = inDanger ? 1.35 : 1.55;
+        cop.alertTimer = inDanger ? 2.2 : 2.8;
         cop.lastKnown = currentTile(game.player);
       } else if (cop.state === "chase") {
         cop.alertTimer -= dt;
@@ -2825,7 +2768,7 @@
     cop.role = "lead";
     cop.roleTimer = 1.65;
     cop.alert = true;
-    cop.alertTimer = inDanger ? 1.35 : 1.55;
+    cop.alertTimer = inDanger ? 2.2 : 2.8;
     cop.searchTimer = 0;
     cop.searchQueue = [];
     cop.searchIndex = 0;
@@ -2834,7 +2777,7 @@
   }
 
   function copSearchDuration(confused = false) {
-    const base = game.runMode === "convocatoria" ? 6 : game.runMode === "survival" ? 5.5 : 4.5;
+    const base = game.runMode === "convocatoria" ? 10 : game.runMode === "survival" ? 9 : 7.5;
     return confused ? base * 0.55 : base;
   }
 
@@ -3502,7 +3445,7 @@
     cop.tempTimer = 20;
     cop.state = "chase";
     cop.alert = true;
-    cop.alertTimer = 1.2;
+    cop.alertTimer = 2.0;
     cop.lastKnown = game.player ? currentTile(game.player) : null;
     game.cops.push(cop);
     burst(cop.x, cop.y, COLORS.danger, 14);
@@ -6147,6 +6090,15 @@
           </div>
         </div>
         ${archiveMeterMarkup()}
+        <div class="menu-tabs" role="tablist">
+          <button class="menu-tab ${menuTab === "play" ? "menu-tab-active" : ""}"
+                  type="button" data-action="tab" data-id="play" role="tab"
+                  aria-selected="${menuTab === "play"}">Ciudad</button>
+          <button class="menu-tab ${menuTab === "archive" ? "menu-tab-active" : ""}"
+                  type="button" data-action="tab" data-id="archive" role="tab"
+                  aria-selected="${menuTab === "archive"}">${archiveProgress().count > 0 ? `Archivo · ${archiveProgress().count}` : "Archivo"}</button>
+        </div>
+        ${menuTab === "archive" ? archiveTabMarkup() : `
         <div class="mode-select" aria-label="Elegir modo de juego">
           <button class="mode-card" type="button" data-action="start" data-mode="story">
             <span class="menu-pixel-icon" data-sprite="round" aria-hidden="true"></span>
@@ -6183,6 +6135,7 @@
         </div>
         <div class="menu-map-note">Una Buenos Aires condensada: plazas, calles y refugios de la cultura joven.</div>
         <p class="quote menu-quote">"La persecución, paradójicamente, ayudó a crear identidad colectiva." - Sergio Pujol</p>
+        `}
       </div>
     `;
     applyPixelIcons(overlay);
@@ -6349,6 +6302,31 @@
         <span>${label}</span>
       </div>
     `;
+  }
+
+  function archiveTabMarkup() {
+    const { archive } = archiveProgress();
+    const KIND_LABEL = {
+      door: "◉", record: "◎", poster: "▨", paper: "≡", bench: "⊏",
+      boutique: "◈", shoe: "⊘", camera: "◰", coffee: "☕", guitar: "♪",
+      scissors: "✂", beach: "◇", books: "▤", flower: "✿", wall: "▩"
+    };
+    const cards = MAP.easterEggs.map((egg) => {
+      if (!archive.has(egg.id)) {
+        return `<div class="archive-card archive-card-locked" aria-label="Archivo sin descubrir"><span>▒▒▒▒▒</span></div>`;
+      }
+      const icon = KIND_LABEL[egg.kind] || "◉";
+      return `
+        <div class="archive-card">
+          <div class="archive-card-head">
+            <span class="archive-card-icon" aria-hidden="true">${icon}</span>
+            <strong>${escapeHtml(egg.label)}</strong>
+            <span class="archive-card-section">${escapeHtml(egg.section)}</span>
+          </div>
+          <p class="archive-card-text">${escapeHtml(egg.text)}</p>
+        </div>`;
+    }).join("");
+    return `<div class="archive-tab-list" aria-label="Archivos encontrados">${cards}</div>`;
   }
 
   function archiveMarkup() {
@@ -6587,6 +6565,7 @@
     if (action === "archetype") { game.archetype = button.dataset.type || "estudiante"; showMenu(); }
     if (action === "style") { game.playerStyle = button.dataset.id || "default"; savePlayerStyle(game.playerStyle); showMenu(); }
     if (action === "difficulty") { game.difficulty = button.dataset.id || "normal"; saveDifficulty(game.difficulty); showMenu(); }
+    if (action === "tab") { menuTab = button.dataset.id || "play"; showMenu(); }
   });
 
   introOverlay.addEventListener("click", (e) => {
